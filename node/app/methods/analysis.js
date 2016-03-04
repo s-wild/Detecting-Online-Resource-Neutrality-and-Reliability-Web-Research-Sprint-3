@@ -5,6 +5,7 @@ const striptags = require('striptags');
 const sentiment = require('sentiment');
 
 const errorCodes = require('../lib/ErrorCodes');
+const commonStarts = require('../lib/CommonStarts');
 
 const AnalysisMethods = function() {
   /**
@@ -40,11 +41,29 @@ const AnalysisMethods = function() {
   function analyzeContent(rbody) {
     const body = JSON.parse(rbody);
     const text = striptags(body.content).replace(/(\r\n|\n|\r)/gm, "");
+    // Thanks to: https://stackoverflow.com/questions/7653942/find-names-with-regular-expression
+    const namesRegEx = /([A-Z][a-z]*)[\s-]([A-Z][a-z]*)/g;
     let data = {
       title: body.title,
-      sentiment: sentiment(text).score
+      sentiment: sentiment(text).score,
+      names: removeCommon(text).match(namesRegEx)
     };
     return data;
+  }
+
+  /**
+   * Removes the commonly capitalized starts to English sentences.
+   * @param  {String} text Document body text.
+   * @return {String} text Result of removing common sentence beginnings.
+   */
+  function removeCommon(text) {
+    commonStarts.forEach(term => {
+      var pattern = term;
+      var re = new RegExp(pattern, "g");
+      text = text.replace(re, '');
+    });
+    console.log(text);
+    return text;
   }
 
   /**
