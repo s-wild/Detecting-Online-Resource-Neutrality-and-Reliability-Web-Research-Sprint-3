@@ -4,7 +4,8 @@
   "description": "Node.JS API server for data filtering and analysis",
   "main": "app/",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app",
+    "lint": "eslint *.js"
   },
   "keywords": [
     "node",
@@ -13,5 +14,12 @@
     "extension"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^2.2.0",
+    "eslint-config-google": "^0.4.0"
+  },
+  "dependencies": {
+    "express": "^4.13.4"
+  }
 }
