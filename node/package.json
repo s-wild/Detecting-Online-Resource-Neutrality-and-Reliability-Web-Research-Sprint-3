@@ -5,7 +5,7 @@
   "main": "app/",
   "scripts": {
     "start": "node app",
-    "lint": "eslint *.js"
+    "lint": "eslint -c .eslintrc.js app"
   },
   "keywords": [
     "node",
@@ -13,13 +13,29 @@
     "chrome",
     "extension"
   ],
-  "author": "",
-  "license": "ISC",
+  "contributors": [
+    {
+      "name": "Simon Wild",
+      "email": "up637415@myport.ac.uk"
+    },
+    {
+      "name": "Merlin Govier",
+      "email": "up663652@myport.ac.uk"
+    },
+    {
+      "name": "Tim Varley",
+      "email": "up656421@myport.ac.uk"
+    }
+  ],
+  "license": "MIT",
   "devDependencies": {
     "eslint": "^2.2.0",
     "eslint-config-google": "^0.4.0"
   },
   "dependencies": {
-    "express": "^4.13.4"
+    "body-parser": "^1.15.0",
+    "dotenv": "^2.0.0",
+    "express": "^4.13.4",
+    "request": "^2.69.0"
   }
 }
