@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Node.JS API server for data filtering and analysis",
   "main": "app/",
+  "repository": "https://github.com/up637415/sprint3",
   "scripts": {
     "start": "node app",
     "lint": "eslint -c .eslintrc.js app"

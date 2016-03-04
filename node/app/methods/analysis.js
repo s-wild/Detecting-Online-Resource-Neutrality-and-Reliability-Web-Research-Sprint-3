@@ -62,7 +62,6 @@ const AnalysisMethods = function() {
       var re = new RegExp(pattern, "g");
       text = text.replace(re, '');
     });
-    console.log(text);
     return text;
   }
 
