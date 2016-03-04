@@ -25,7 +25,7 @@ Requires [eslint](http://eslint.org/), with google and xo packages.
 
 #### Config and API keys
 Requires a API keys to communicate with services:
-* (Readability Parser API)[https://www.readability.com/developers/api/parser]
+* [Readability Parser API](https://www.readability.com/developers/api/parser)
 
 These keys should be placed in a `.env` file in the node folder.
 An example is provides as `.env-sample`.
