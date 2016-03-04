@@ -1,0 +1,17 @@
+{
+  "name": "sprint3",
+  "version": "0.0.1",
+  "description": "Node.JS API server for data filtering and analysis",
+  "main": "app/",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "node",
+    "api",
+    "chrome",
+    "extension"
+  ],
+  "author": "",
+  "license": "ISC"
+}
