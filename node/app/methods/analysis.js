@@ -1,6 +1,8 @@
 'use strict';
 
 const request = require('request');
+const striptags = require('striptags');
+const sentiment = require('sentiment');
 
 const errorCodes = require('../lib/ErrorCodes');
 
@@ -37,9 +39,10 @@ const AnalysisMethods = function() {
    */
   function analyzeContent(rbody) {
     const body = JSON.parse(rbody);
+    const text = striptags(body.content).replace(/(\r\n|\n|\r)/gm, "");
     let data = {
       title: body.title,
-      content: body.content
+      sentiment: sentiment(text).score
     };
     return data;
   }
