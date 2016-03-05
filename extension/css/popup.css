@@ -8,6 +8,10 @@ body {
   display: block;
 }
 /* Text Styling */
+h1 {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
 .text-center {
   text-align: center;
 }
