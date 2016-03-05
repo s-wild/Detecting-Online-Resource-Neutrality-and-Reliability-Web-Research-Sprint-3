@@ -10,7 +10,8 @@
    "default_popup": "popup.html"
   },
   "permissions": [
-   "activeTab",
-   "tabs"
+     "activeTab",
+     "tabs",
+     "*://*/*"
    ]
 }

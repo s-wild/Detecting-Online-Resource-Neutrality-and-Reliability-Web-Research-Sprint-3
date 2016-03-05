@@ -3,8 +3,10 @@
   "version": "0.0.1",
   "description": "Node.JS API server for data filtering and analysis",
   "main": "app/",
+  "repository": "https://github.com/up637415/sprint3",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app",
+    "lint": "eslint -c .eslintrc.js app"
   },
   "keywords": [
     "node",
@@ -12,6 +14,31 @@
     "chrome",
     "extension"
   ],
-  "author": "",
-  "license": "ISC"
+  "contributors": [
+    {
+      "name": "Simon Wild",
+      "email": "up637415@myport.ac.uk"
+    },
+    {
+      "name": "Merlin Govier",
+      "email": "up663652@myport.ac.uk"
+    },
+    {
+      "name": "Tim Varley",
+      "email": "up656421@myport.ac.uk"
+    }
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^2.2.0",
+    "eslint-config-google": "^0.4.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "dotenv": "^2.0.0",
+    "express": "^4.13.4",
+    "request": "^2.69.0",
+    "sentiment": "^1.0.6",
+    "striptags": "^2.1.1"
+  }
 }
