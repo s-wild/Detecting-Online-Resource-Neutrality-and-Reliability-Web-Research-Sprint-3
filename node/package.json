@@ -38,6 +38,7 @@
     "dotenv": "^2.0.0",
     "express": "^4.13.4",
     "request": "^2.69.0",
+    "rousseau": "^1.0.4",
     "sentiment": "^1.0.6",
     "striptags": "^2.1.1"
   }
