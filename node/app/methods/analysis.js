@@ -3,6 +3,7 @@
 const request = require('request');
 const striptags = require('striptags');
 const sentiment = require('sentiment');
+const rousseau = require("rousseau");
 
 const errorCodes = require('../lib/ErrorCodes');
 const commonStarts = require('../lib/CommonStarts');
@@ -43,10 +44,36 @@ const AnalysisMethods = function() {
     const text = striptags(body.content).replace(/(\r\n|\n|\r)/gm, "");
     // Thanks to: https://stackoverflow.com/questions/7653942/find-names-with-regular-expression
     const namesRegEx = /([A-Z][a-z]*)[\s-]([A-Z][a-z]*)/g;
+    var warnings = [];
+    rousseau(text, {
+      checks: {
+        passive: true,
+        simplicity: true,
+        so: false,
+        abverbs: true,
+        readibility: false,
+        'lexical-illusion': false,
+        weasel: true,
+        'sentence:start': false,
+        'sentence:end': false,
+        'sentence:uppercase': false
+      }
+    }, (err, results) => {
+      if (err) {
+        console.log(err);
+      }
+      results.forEach(suggestion => {
+        warnings.push(suggestion.type);
+      });
+      warnings = warnings.reduce(function(countMap, word) {
+        countMap[word] = ++countMap[word] || 1; return countMap;
+      }, {});
+    });
     let data = {
       title: body.title,
       sentiment: sentiment(text).score,
-      names: removeCommon(text).match(namesRegEx)
+      names: removeCommon(text).match(namesRegEx),
+      warnings: warnings
     };
     data.names = data.names.reduce(function(countMap, word) {
       countMap[word] = ++countMap[word] || 1; return countMap;
