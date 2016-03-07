@@ -3,6 +3,7 @@
   <head>
     <img class="icon" src="images/icon.png" alt="Icon">
     <title>Content Analyzer</title>
+    <script src="js/libraries/gauge.min.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/popup.js"></script>
     <link rel="stylesheet" type="text/css" href="css/popup.css">
@@ -10,6 +11,16 @@
   <body>
     <h1 class="text-center">Content Analyzer</h1>
     <!-- <button id="checkPage">Check this page now!</button> -->
-    <p class="text-center" id="results">Results</p>
+    <div class="statistics text-center">
+      <h2>Statistics</h2>
+      <div class="result">
+        <span class="stat-title font-large">Sentiment</span>
+        <canvas id="sentiment"></canvas>
+      </div>
+      <div class="result">
+        <span class="stat-title font-large">Language</span>
+        <canvas id="writing"></canvas>
+      </div>
+    </div>
   </body>
 </html>
