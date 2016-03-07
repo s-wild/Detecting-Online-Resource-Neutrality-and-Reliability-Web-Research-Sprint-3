@@ -14,8 +14,8 @@ const AnalysisMethods = function() {
    * @param  {object} res Response.
    */
   function analyzeURL(req, res) {
+    console.log(req.body);
     const url = req.body.url;
-
     const handleResponse = (error, response, body) => {
       if (error || response.statusCode !== 200) {
         res.status(errorCodes.server.code);

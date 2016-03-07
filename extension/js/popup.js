@@ -20,32 +20,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function getURLContents() {
 
-    // Chrome API to get url.
-    chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
-        // Get URL in current tab.
-        var currentProtocolURL = tabs[0].url;
-        // remove protocol from String using regex from http://stackoverflow.com/questions/8206269/how-to-remove-http-from-a-url-in-javascript
-        var currentURL = currentProtocolURL.replace(/.*?:\/\//g, "");
+  var url = server_url + 'api/';
+  // Chrome API to get url.
+  chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
+      // Get URL in current tab.
+      currentURL = tabs[0].url;
 
-        // Combine server URL (settings.js) with chrome tab URL.
-        var url = server_url + 'api/' + currentURL;
-        responseValues = "na";
-        console.log(url);
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
-        // GET request.
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                // Parse JSON from URL... May need updating when we return JSON instead of text.
-                var responseValues = xmlhttp.responseText;
-                console.log("responseValues", responseValues);
+      // send the collected data as JSON
+      xhr.send(JSON.stringify({url: currentURL}));
 
-                var currentResults = document.getElementById("results");
-                currentResults.innerHTML = responseValues;
-            }
-        };
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
-        return responseValues;
-    });
+      xhr.onloadend = function (data) {
+        console.log(data);
+      };
+      return responseValues;
+  });
 }
