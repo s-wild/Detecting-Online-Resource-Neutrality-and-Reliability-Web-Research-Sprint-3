@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
 }, false);
 
 function getURLContents() {
-
   var url = server_url + 'api/';
   // Chrome API to get url.
   chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
@@ -30,12 +29,10 @@ function getURLContents() {
       xhr.open('POST', url, true);
       xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
+      xhr.onload = function () {
+        console.log(this.responseText);
+      };
       // send the collected data as JSON
       xhr.send(JSON.stringify({url: currentURL}));
-
-      xhr.onloadend = function (data) {
-        console.log(data);
-      };
-      return responseValues;
   });
 }
