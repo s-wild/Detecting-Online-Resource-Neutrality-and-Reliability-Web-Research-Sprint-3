@@ -48,6 +48,11 @@ const AnalysisMethods = function() {
       sentiment: sentiment(text).score,
       names: removeCommon(text).match(namesRegEx)
     };
+    data.names = data.names.reduce(function(countMap, word) {
+      countMap[word] = ++countMap[word] || 1; return countMap;
+    }, {});
+
+    // Analyse spelling!!
     return data;
   }
 
