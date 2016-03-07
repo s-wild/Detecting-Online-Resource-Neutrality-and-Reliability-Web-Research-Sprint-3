@@ -7,6 +7,8 @@
 
 // DOM Content Ready function.
 document.addEventListener('DOMContentLoaded', function() {
+  // Performance timer
+  start_time = new Date().getTime();
   hideResults();
   activityIndicator();
 
@@ -46,6 +48,10 @@ function postTabURL() {
                 console.log("responseValues", sentimentValue);
                 gaugeGenerator(sentimentValue, "sentiment");
                 showResults();
+                // Response time.
+                var request_time = new Date().getTime() - start_time;
+                console.log("req time",request_time);
+                document.getElementById("responseTime").innerHTML = request_time;
             }
             else {
               console.log("error");
