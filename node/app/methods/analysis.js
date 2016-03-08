@@ -121,7 +121,7 @@ const AnalysisMethods = function() {
     });
     if (warnings.simplicity > 1) {
       descriptions.push('This text could be overcomplicating its writing.' +
-        ` ${warnings.simplicity} sentence matched.`);
+        ` ${warnings.simplicity} sentences matched.`);
     }
     if (warnings.abverbs > 0) {
       descriptions.push('It looks like abverbs are being used to emphasize ' +
