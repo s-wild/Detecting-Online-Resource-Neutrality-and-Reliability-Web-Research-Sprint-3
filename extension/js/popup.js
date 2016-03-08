@@ -58,6 +58,9 @@ function postTabURL() {
             }
         };
         xmlhttp.open("POST", url, true);
+        xmlhttp.onerror= function(e) {
+            errorMessage();
+        };
         xmlhttp.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
         xmlhttp.send(JSON.stringify(data));
         return responseValues;
@@ -136,4 +139,8 @@ function hideResults() {
 function showResults() {
   document.getElementById("results").style.display = 'block';
   document.getElementById("spinner").style.display = 'none';
+}
+function errorMessage(){
+  showResults();
+  document.getElementById("results").innerHTML = "<p>Problems connecting with server...</p>";
 }
