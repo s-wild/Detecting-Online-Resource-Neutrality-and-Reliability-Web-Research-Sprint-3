@@ -3,7 +3,7 @@
 const request = require('request');
 const striptags = require('striptags');
 const sentiment = require('sentiment');
-const rousseau = require("rousseau");
+const rousseau = require('rousseau');
 
 const errorCodes = require('../lib/ErrorCodes');
 const commonStarts = require('../lib/CommonStarts');
@@ -11,8 +11,8 @@ const commonStarts = require('../lib/CommonStarts');
 const AnalysisMethods = function() {
   /**
    * Perform analysis of URL.
-   * @param  {object} req Express request.
-   * @param  {object} res Response.
+   * @param  {Object} req Express request.
+   * @param  {Object} res Response.
    */
   function analyzeURL(req, res) {
     console.log(req.body);
@@ -36,24 +36,74 @@ const AnalysisMethods = function() {
 
   /**
    * Perform analysis on extracted URL content.
-   * @param  {JSON}   rbody   Readability parser results.
-   * @return {JSON}   data    Results of analysis.
+   * @param  {Object}   rbody   Readability parser results.
+   * @return {Object}   data    Results of analysis.
    */
   function analyzeContent(rbody) {
     const body = JSON.parse(rbody);
-    const text = striptags(body.content).replace(/(\r\n|\n|\r)/gm, "");
+    const text = striptags(body.content).replace(/(\r\n|\n|\r)/gm, " ");
     // Thanks to: https://stackoverflow.com/questions/7653942/find-names-with-regular-expression
     const namesRegEx = /([A-Z][a-z]*)[\s-]([A-Z][a-z]*)/g;
+    console.log(text);
+    let data = {
+      title: body.title,
+      sentiment: calculateSentiment(text),
+      names: removeCommon(text).match(namesRegEx),
+      warnings: proofRead(text)
+    };
+    data.names = data.names.reduce(function(countMap, word) {
+      countMap[word] = ++countMap[word] || 1; return countMap;
+    }, {});
+
+    // Analyse spelling!!
+    return data;
+  }
+
+  /**
+   * Removes the commonly capitalized starts to English sentences.
+   * @param  {string} text Document body text.
+   * @return {string} text Result of removing common sentence beginnings.
+   */
+  function removeCommon(text) {
+    commonStarts.forEach(term => {
+      var pattern = term;
+      var re = new RegExp(pattern, "g");
+      text = text.replace(re, '');
+    });
+    return text;
+  }
+
+  /**
+   * Calculate a percentage sentiment rating.
+   * From 0 (very negative) to 100 (very positive).
+   * @param  {string} text  Input body text to be analyzed.
+   * @return {number}          Text positivity percentage.
+   */
+  function calculateSentiment(text) {
+    const result = sentiment(text);
+    const potential = result.words.length * 10;
+    const actual = result.score + (5 * result.words.length);
+    const percentageSentiment = (actual / potential) * 100;
+    return percentageSentiment.toFixed(2);
+  }
+
+  /**
+   * Analyze the text for grammatical properties that may affect reliability.
+   * @param  {string} text  Body to analyze.
+   * @return {Array}        Warnings generated.
+   */
+  function proofRead(text) {
     var warnings = [];
+    var descriptions = [];
     rousseau(text, {
       checks: {
-        passive: true,
-        simplicity: true,
-        so: false,
-        abverbs: true,
-        readibility: false,
+        'passive': false,
+        'simplicity': true,
+        'so': false,
+        'abverbs': true,
+        'readibility': false,
         'lexical-illusion': false,
-        weasel: true,
+        'weasel': true,
         'sentence:start': false,
         'sentence:end': false,
         'sentence:uppercase': false
@@ -69,32 +119,21 @@ const AnalysisMethods = function() {
         countMap[word] = ++countMap[word] || 1; return countMap;
       }, {});
     });
-    let data = {
-      title: body.title,
-      sentiment: sentiment(text).score,
-      names: removeCommon(text).match(namesRegEx),
-      warnings: warnings
-    };
-    data.names = data.names.reduce(function(countMap, word) {
-      countMap[word] = ++countMap[word] || 1; return countMap;
-    }, {});
+    if (warnings.simplicity > 1) {
+      descriptions.push('This text could be overcomplicating its writing.' +
+        ` ${warnings.simplicity} sentence matched.`);
+    }
+    if (warnings.abverbs > 0) {
+      descriptions.push('It looks like abverbs are being used to emphasize ' +
+      `statements, such as 'very', or 'extremely'. Check those sources!` +
+      `Counted ${warnings.abverbs} times.`);
+    }
+    if (warnings.weasel > 0) {
+      descriptions.push('Weasel words, which can be used to imply meaning ' +
+       `beyond the supporting evidence, were found ${warnings.weasel} times.`);
+    }
 
-    // Analyse spelling!!
-    return data;
-  }
-
-  /**
-   * Removes the commonly capitalized starts to English sentences.
-   * @param  {String} text Document body text.
-   * @return {String} text Result of removing common sentence beginnings.
-   */
-  function removeCommon(text) {
-    commonStarts.forEach(term => {
-      var pattern = term;
-      var re = new RegExp(pattern, "g");
-      text = text.replace(re, '');
-    });
-    return text;
+    return descriptions;
   }
 
   /**
