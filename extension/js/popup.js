@@ -35,35 +35,41 @@ function postTabURL() {
         // Combine server URL (settings.js) with chrome tab URL.
         var url = server_url + 'api';
         responseValues = "na";
+        console.log(currentProtocolURL, "currentProtocolURL");
+        if (currentProtocolURL == "chrome://newtab/") {
+          console.log("visit page...");
+          errorMessageNoUrl();
+        }
+        else {
+          var data = {"url": currentProtocolURL};
 
-        var data = {"url": currentProtocolURL};
-
-        // POST request.
-        var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                // Parse JSON from URL... May need updating when we return JSON instead of text.
-                var responseValues = JSON.parse(xmlhttp.responseText);
-                sentimentValue = responseValues.sentiment;
-                console.log("responseValues", sentimentValue);
-                gaugeGenerator(sentimentValue, "sentiment");
-                showResults();
-                // Response time.
-                var request_time = new Date().getTime() - start_time;
-                console.log("req time",request_time);
-                document.getElementById("responseTime").innerHTML = request_time;
-            }
-            else {
-              console.log("error");
-            }
-        };
-        xmlhttp.open("POST", url, true);
-        xmlhttp.onerror= function(e) {
-            errorMessage();
-        };
-        xmlhttp.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-        xmlhttp.send(JSON.stringify(data));
-        return responseValues;
+          // POST request.
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function() {
+              if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                  // Parse JSON from URL... May need updating when we return JSON instead of text.
+                  var responseValues = JSON.parse(xmlhttp.responseText);
+                  sentimentValue = responseValues.sentiment;
+                  console.log("responseValues", sentimentValue);
+                  gaugeGenerator(sentimentValue, "sentiment");
+                  showResults();
+                  // Response time.
+                  var request_time = new Date().getTime() - start_time;
+                  console.log("req time",request_time);
+                  document.getElementById("responseTime").innerHTML = request_time;
+              }
+              else {
+                console.log("error");
+              }
+          };
+          xmlhttp.open("POST", url, true);
+          xmlhttp.onerror= function(e) {
+              errorMessage();
+          };
+          xmlhttp.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+          xmlhttp.send(JSON.stringify(data));
+          return responseValues;
+        }
     });
 }
 
@@ -143,4 +149,8 @@ function showResults() {
 function errorMessage(){
   showResults();
   document.getElementById("results").innerHTML = "<p>Problems connecting with server...</p>";
+}
+function errorMessageNoUrl(){
+  showResults();
+  document.getElementById("results").innerHTML = "<p>Please visit a web page...</p>";
 }
