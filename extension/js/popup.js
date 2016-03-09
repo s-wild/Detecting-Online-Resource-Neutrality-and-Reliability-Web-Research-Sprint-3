@@ -192,7 +192,7 @@ function generateEmoji(emotionType, emotionValue) {
     break;
     case emotionType == "anger":
       document.getElementById("emotionText").innerHTML = 'Anger';
-      document.getElementById("emotion").innerHTML = '<img src="images/anger.png" alt="Emoji Icon">';
+      document.getElementById("emotion").innerHTML = '<img src="images/angry.png" alt="Emoji Icon">';
     break;
     case emotionType == "fear":
       document.getElementById("emotionText").innerHTML = 'Fear';
