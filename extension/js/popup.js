@@ -87,26 +87,22 @@ function gaugeGenerator(value, type){
       case value > 70:
           console.log("Positive");
           document.getElementById("sentimentText").innerHTML = "Positive";
-          var gaugeColour = "green";
-          var gaugeColour2 = "green";
           break;
       case value <= 70 && value > 50 :
           console.log("Neutral/Positive");
           document.getElementById("sentimentText").innerHTML = "Neutral/Positive";
-          var gaugeColour = "orange";
-          var gaugeColour2 = "green";
+          break;
+      case value == 50:
+          console.log("Neutral");
+          document.getElementById("sentimentText").innerHTML = "Neutral";
           break;
       case value < 50 && value >= 30 :
           console.log("Neutral/Negative");
           document.getElementById("sentimentText").innerHTML = "Neutral/Negative";
-          var gaugeColour = "orange";
-          var gaugeColour2 = "red";
           break;
       case value < 30:
           console.log("Negative");
           document.getElementById("sentimentText").innerHTML = "Negative";
-          var gaugeColour = "red";
-          var gaugeColour2 = "red";
           break;
       default:
           console.log("Can't calculate value.");
