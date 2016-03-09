@@ -128,7 +128,7 @@ const AnalysisMethods = function() {
    * @return {Number}         Percentage spelling accuracy.
    */
   function analyzeSpelling(text) {
-    return Math.round(Math.random()*10) + 1;
+    return Math.round(Math.random() * 100) + 1;
   }
 
   /**
