@@ -198,12 +198,21 @@ const AnalysisMethods = function() {
           request('http://gateway-a.watsonplatform.net/calls/url/URLGetEmotion' +
             `?apikey=${process.env.ALCHEMY_API_KEY}` +
             `&url=${encodeURI(url)}&outputMode=json`,
-          (err, response, body) => {
-            if (err || response.statusCode !== 200) {
-              reject(console.log(err || response.statusCode));
-            }
-            callback(null, JSON.parse(body).docEmotions);
-          });
+            (err, response, body) => {
+              if (err || response.statusCode !== 200) {
+                reject(console.log(err || response.statusCode));
+              }
+              var result = JSON.parse(body).docEmotions;
+              var highestEmo;
+              let highestVal = -Infinity;
+              Object.keys(result).forEach(emotion => {
+                if (result[emotion] > highestVal) {
+                  highestEmo = emotion;
+                  highestVal = result[emotion];
+                }
+              });
+              callback(null, {type: highestEmo, value: highestVal});
+            });
         }
       }, (err, result) => {
         if (err) {
