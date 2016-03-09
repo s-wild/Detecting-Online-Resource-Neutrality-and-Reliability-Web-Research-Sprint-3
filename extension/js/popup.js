@@ -51,9 +51,12 @@ function postTabURL() {
                   const responseValues = JSON.parse(xmlhttp.responseText);
                   var sentimentValue = responseValues.sentiment;
                   var spellingValue = responseValues.spelling;
+                  var emotionType = responseValues.alchemy.emotion.highest;
+                  var emotionValue = responseValues.alchemy.emotion.value;
                   console.log("responseValues", responseValues);
                   gaugeGenerator(sentimentValue, "sentiment");
                   spellingRatingGenerator(spellingValue);
+                  generateEmoji(emotionType, emotionValue);
                   showResults();
                   // Response time.
                   var request_time = new Date().getTime() - start_time;
@@ -115,14 +118,42 @@ function gaugeGenerator(value, type){
     gauge.set(value); // set actual value
   }
 }
+/*
+* Spelling Generator.
+*/
 function spellingRatingGenerator(spellingValue) {
   console.log("spellingValue", spellingValue);
-  var starValue = (spellingValue/2)/5;
-  console.log("starValue", starValue);
+  var starValue = (parseInt(spellingValue))/20;
+  var starValueRounded = starValue.toFixed(0);
+  console.log("starValue", starValueRounded);
   $('#example').barrating({
     theme: 'fontawesome-stars'
   });
-  $('#example').barrating('set', starValue);
+  $('#example').barrating('set', starValueRounded);
+}
+/*
+* Generate Emoji.
+*/
+function generateEmoji(emotionType, emotionValue) {
+  switch(true) {
+    case emotionType == "joy":
+      document.getElementById("emotion").innerHTML = '<img src="images/joy.png" alt="Emoji Icon">';
+    break;
+    case emotionType == "disgust":
+      document.getElementById("emotion").innerHTML = '<img src="images/disgust.png" alt="Emoji Icon">';
+    break;
+    case emotionType == "anger":
+      document.getElementById("emotion").innerHTML = '<img src="images/anger.png" alt="Emoji Icon">';
+    break;
+    case emotionType == "fear":
+      document.getElementById("emotion").innerHTML = '<img src="images/fear.png" alt="Emoji Icon">';
+    break;
+    case emotionType == "sadness":
+      document.getElementById("emotion").innerHTML = '<img src="images/sadness.png" alt="Emoji Icon">';
+    break;
+    default:
+        console.log("no match...");
+  }
 }
 /*
 * Actiivity loader.

@@ -61,3 +61,7 @@ h2 {
 .br-wrapper {
   padding-top: 1em;
 }
+#emotion img {
+  max-width: 3em;
+  height: auto;
+}
