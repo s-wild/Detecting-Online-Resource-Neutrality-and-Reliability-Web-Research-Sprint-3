@@ -65,3 +65,18 @@ h2 {
   max-width: 3em;
   height: auto;
 }
+/*
+* Language
+*/
+#langRating {
+  display: block;
+  padding-top: 0.9em;
+}
+/*
+* Language
+*/
+#emotion {
+  display: block;
+  padding-bottom: 0.9em;
+  padding-top: 0.2em;
+}

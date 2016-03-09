@@ -82,6 +82,36 @@ function postTabURL() {
 * Gauge
 */
 function gaugeGenerator(value, type){
+  // Check values for text.
+  switch(true) {
+      case value > 70:
+          console.log("Positive");
+          document.getElementById("sentimentText").innerHTML = "Positive";
+          var gaugeColour = "green";
+          var gaugeColour2 = "green";
+          break;
+      case value <= 70 && value > 50 :
+          console.log("Neutral/Positive");
+          document.getElementById("sentimentText").innerHTML = "Neutral/Positive";
+          var gaugeColour = "orange";
+          var gaugeColour2 = "green";
+          break;
+      case value < 50 && value >= 30 :
+          console.log("Neutral/Negative");
+          document.getElementById("sentimentText").innerHTML = "Neutral/Negative";
+          var gaugeColour = "orange";
+          var gaugeColour2 = "red";
+          break;
+      case value < 30:
+          console.log("Negative");
+          document.getElementById("sentimentText").innerHTML = "Negative";
+          var gaugeColour = "red";
+          var gaugeColour2 = "red";
+          break;
+      default:
+          console.log("Can't calculate value.");
+  }
+
   var opts = {
     lines: 12, // The number of lines to draw
     angle: 0.15, // The length of each line
@@ -92,11 +122,12 @@ function gaugeGenerator(value, type){
       color: '#000000' // Fill color
     },
     limitMax: 'false',   // If true, the pointer will not go past the end of the gauge
-    colorStart: '#6FADCF',   // Colors
-    colorStop: '#8FC0DA',    // just experiment with them
-    strokeColor: '#E0E0E0',   // to see which ones work best for you
-    generateGradient: true
+    //colorStart: 'red',   // Colors
+    colorStop: 'green',    // just experiment with them
+    strokeColor: 'red',   // to see which ones work best for you
+    generateGradient: false,
   };
+  // Check type for gauge
   switch(true) {
       case type == "sentiment":
           var target = document.getElementById('sentiment');
@@ -130,6 +161,21 @@ function spellingRatingGenerator(spellingValue) {
     theme: 'fontawesome-stars'
   });
   $('#example').barrating('set', starValueRounded);
+  if(starValueRounded == 5) {
+      document.getElementById("langRating").innerHTML = 'Exceptional';
+  }
+  if(starValueRounded == 4) {
+      document.getElementById("langRating").innerHTML = 'Good';
+  }
+  if(starValueRounded == 3) {
+      document.getElementById("langRating").innerHTML = 'Average';
+  }
+  if(starValueRounded == 2) {
+      document.getElementById("langRating").innerHTML = 'Poor';
+  }
+  if(starValueRounded == 1) {
+      document.getElementById("langRating").innerHTML = 'Terrible';
+  }
 }
 /*
 * Generate Emoji.
@@ -138,22 +184,28 @@ function generateEmoji(emotionType, emotionValue) {
   switch(true) {
     case emotionType == "joy":
       document.getElementById("emotion").innerHTML = '<img src="images/joy.png" alt="Emoji Icon">';
+      document.getElementById("emotionText").innerHTML = 'Joy';
     break;
     case emotionType == "disgust":
+      document.getElementById("emotionText").innerHTML = 'Disgust';
       document.getElementById("emotion").innerHTML = '<img src="images/disgust.png" alt="Emoji Icon">';
     break;
     case emotionType == "anger":
+      document.getElementById("emotionText").innerHTML = 'Anger';
       document.getElementById("emotion").innerHTML = '<img src="images/anger.png" alt="Emoji Icon">';
     break;
     case emotionType == "fear":
+      document.getElementById("emotionText").innerHTML = 'Fear';
       document.getElementById("emotion").innerHTML = '<img src="images/fear.png" alt="Emoji Icon">';
     break;
     case emotionType == "sadness":
+      document.getElementById("emotionText").innerHTML = 'Sadness';
       document.getElementById("emotion").innerHTML = '<img src="images/sadness.png" alt="Emoji Icon">';
     break;
     default:
         console.log("no match...");
   }
+
 }
 /*
 * Actiivity loader.
