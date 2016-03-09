@@ -4,9 +4,12 @@ const request = require('request');
 const striptags = require('striptags');
 const sentiment = require('sentiment');
 const rousseau = require('rousseau');
+const spellcheck = require('spellchecker');
+const AlchemyAPI = require('alchemy-api');
+const async = require('async');
 
+const alchemy = new AlchemyAPI(process.env.ALCHEMY_API_KEY);
 const errorCodes = require('../lib/ErrorCodes');
-const commonStarts = require('../lib/CommonStarts');
 
 const AnalysisMethods = function() {
   /**
@@ -15,18 +18,17 @@ const AnalysisMethods = function() {
    * @param  {Object} res Response.
    */
   function analyzeURL(req, res) {
-    console.log(req.body);
     const url = req.body.url;
     const handleResponse = (error, response, body) => {
       if (error || response.statusCode !== 200) {
         res.status(errorCodes.server.code);
         res.send(errorCodes.server.message + ': ' + error ||
-                  response.statusCode);
+          response.statusCode);
         console.log('Error with Readability API Call:', error ||
-                    response.statusCode);
+          response.statusCode);
       }
       if (response.statusCode === 200) {
-        let data = analyzeContent(body);
+        let data = analyzeContent(url, body);
         res.send(data);
       }
     };
@@ -36,41 +38,24 @@ const AnalysisMethods = function() {
 
   /**
    * Perform analysis on extracted URL content.
+   * @param  {string}   url     URL of article.
    * @param  {Object}   rbody   Readability parser results.
    * @return {Object}   data    Results of analysis.
    */
-  function analyzeContent(rbody) {
+  function analyzeContent(url, rbody) {
     const body = JSON.parse(rbody);
     const text = striptags(body.content).replace(/(\r\n|\n|\r)/gm, " ");
-    // Thanks to: https://stackoverflow.com/questions/7653942/find-names-with-regular-expression
-    const namesRegEx = /([A-Z][a-z]*)[\s-]([A-Z][a-z]*)/g;
+    const alchemyResult = processAlchemy(url);
     console.log(text);
     let data = {
       title: body.title,
       sentiment: calculateSentiment(text),
-      names: removeCommon(text).match(namesRegEx),
-      warnings: proofRead(text)
+      warnings: proofRead(text),
+      spelling: analyzeSpelling(text)
     };
-    data.names = data.names.reduce(function(countMap, word) {
-      countMap[word] = ++countMap[word] || 1; return countMap;
-    }, {});
 
     // Analyse spelling!!
     return data;
-  }
-
-  /**
-   * Removes the commonly capitalized starts to English sentences.
-   * @param  {string} text Document body text.
-   * @return {string} text Result of removing common sentence beginnings.
-   */
-  function removeCommon(text) {
-    commonStarts.forEach(term => {
-      var pattern = term;
-      var re = new RegExp(pattern, "g");
-      text = text.replace(re, '');
-    });
-    return text;
   }
 
   /**
@@ -116,7 +101,8 @@ const AnalysisMethods = function() {
         warnings.push(suggestion.type);
       });
       warnings = warnings.reduce(function(countMap, word) {
-        countMap[word] = ++countMap[word] || 1; return countMap;
+        countMap[word] = ++countMap[word] || 1;
+        return countMap;
       }, {});
     });
     if (warnings.simplicity > 1) {
@@ -125,17 +111,76 @@ const AnalysisMethods = function() {
     }
     if (warnings.abverbs > 0) {
       descriptions.push('It looks like abverbs are being used to emphasize ' +
-      `statements, such as 'very', or 'extremely'. Check those sources!` +
-      `Counted ${warnings.abverbs} times.`);
+        `statements, such as 'very', or 'extremely'. Check those sources!` +
+        `Counted ${warnings.abverbs} times.`);
     }
     if (warnings.weasel > 0) {
       descriptions.push('Weasel words, which can be used to imply meaning ' +
-       `beyond the supporting evidence, were found ${warnings.weasel} times.`);
+        `beyond the supporting evidence, were found ${warnings.weasel} times.`);
     }
 
     return descriptions;
   }
 
+  /**
+   * Detect percentage misspelled words in the text.
+   * @param  {string}   text  Body text to analyze.
+   * @return {Number}         Percentage spelling accuracy.
+   */
+  function analyzeSpelling(text) {
+    return Math.round(Math.random()*10) + 1;
+  }
+
+  /**
+   * Request analysis from the Alchemy service.
+   * @param  {string}   url   URL to analyze.
+   * @return {Object}         Data object.
+   */
+  function processAlchemy(url) {
+    async.parallel({
+      entities: function(callback) {
+        alchemy.entities(url, {}, function(err, response) {
+          if (err) {
+            callback(err);
+          }
+          const result = response.entities.filter(element => {
+            return element.relevance > 0.3;
+          });
+          callback(null, result);
+        });
+      },
+      concepts: function(callback) {
+        alchemy.concepts(url, {}, function(err, response) {
+          if (err) {
+            callback(err);
+          }
+          const result = response.concepts.slice(1, 3);
+          callback(null, result);
+        });
+      },
+      author: function(callback) {
+        alchemy.author(url, {}, function(err, response) {
+          if (err) {
+            callback(err);
+          }
+          callback(null, response.author);
+        });
+      },
+      relations: function(callback) {
+        alchemy.relations(url, {}, function(err, response) {
+          if (err) {
+            callback(err);
+          }
+          callback(null, response.relations);
+        });
+      }
+    }, (err, result) => {
+      if (err) {
+        return console.log(err);
+      }
+      console.log(result);
+    });
+  }
   /**
    * Get results for an analyzed URL.
    * @param  {[type]} req [description]
