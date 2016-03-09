@@ -117,7 +117,7 @@ function gaugeGenerator(value, type){
 }
 function spellingRatingGenerator(spellingValue) {
   console.log("spellingValue", spellingValue);
-  var starValue = spellingValue*5;
+  var starValue = (spellingValue/2)/5;
   console.log("starValue", starValue);
   $('#example').barrating({
     theme: 'fontawesome-stars'

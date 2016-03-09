@@ -28,8 +28,10 @@ const AnalysisMethods = function() {
           response.statusCode);
       }
       if (response.statusCode === 200) {
-        let data = analyzeContent(url, body);
-        res.send(data);
+        let dataPromise = analyzeContent(url, body);
+        dataPromise.then(result => {
+          res.send(result);
+        });
       }
     };
     request('https://readability.com/api/content/v1/parser?' +
@@ -38,30 +40,35 @@ const AnalysisMethods = function() {
 
   /**
    * Perform analysis on extracted URL content.
-   * @param  {string}   url     URL of article.
+   * @param  {String}   url     URL of article.
    * @param  {Object}   rbody   Readability parser results.
    * @return {Object}   data    Results of analysis.
    */
   function analyzeContent(url, rbody) {
     const body = JSON.parse(rbody);
     const text = striptags(body.content).replace(/(\r\n|\n|\r)/gm, " ");
-    const alchemyResult = processAlchemy(url);
-    console.log(text);
-    let data = {
-      title: body.title,
-      sentiment: calculateSentiment(text),
-      warnings: proofRead(text),
-      spelling: analyzeSpelling(text)
-    };
-
-    // Analyse spelling!!
-    return data;
+    const alchemyPromise = processAlchemy(url);
+    return new Promise((resolve, reject) => {
+      alchemyPromise.then((res, rej) => {
+        if (rej) {
+          reject(rej);
+        }
+        let data = {
+          title: body.title,
+          sentiment: calculateSentiment(text),
+          warnings: proofRead(text),
+          spelling: analyzeSpelling(text),
+          alchemy: res
+        };
+        resolve(data);
+      });
+    });
   }
 
   /**
    * Calculate a percentage sentiment rating.
    * From 0 (very negative) to 100 (very positive).
-   * @param  {string} text  Input body text to be analyzed.
+   * @param  {String} text  Input body text to be analyzed.
    * @return {number}          Text positivity percentage.
    */
   function calculateSentiment(text) {
@@ -74,7 +81,7 @@ const AnalysisMethods = function() {
 
   /**
    * Analyze the text for grammatical properties that may affect reliability.
-   * @param  {string} text  Body to analyze.
+   * @param  {String} text  Body to analyze.
    * @return {Array}        Warnings generated.
    */
   function proofRead(text) {
@@ -118,73 +125,99 @@ const AnalysisMethods = function() {
       descriptions.push('Weasel words, which can be used to imply meaning ' +
         `beyond the supporting evidence, were found ${warnings.weasel} times.`);
     }
-
     return descriptions;
   }
 
   /**
    * Detect percentage misspelled words in the text.
-   * @param  {string}   text  Body text to analyze.
+   * @param  {String}   text  Body text to analyze.
    * @return {Number}         Percentage spelling accuracy.
    */
   function analyzeSpelling(text) {
-    return Math.round(Math.random()*10) + 1;
+    const tokens = text.split(' ');
+    var totalTokens = 0;
+    var correctTokens = 0;
+    tokens.forEach(token => {
+      token = token.split('.')[0];
+      token = token.replace(/['`~!@#$%^&*()_|+=?;:\"',.<>\/]/gi, '');
+      if (token.length > 0) {
+        totalTokens++;
+        if (!spellcheck.isMisspelled(token)) {
+          correctTokens++;
+        }
+      }
+    });
+    return ((correctTokens / totalTokens) * 100).toFixed(2);
   }
 
   /**
    * Request analysis from the Alchemy service.
-   * @param  {string}   url   URL to analyze.
-   * @return {Object}         Data object.
+   * @param  {String}   url   URL to analyze.
+   * @return {Promise}        Promise to fulfill on API completion.
    */
   function processAlchemy(url) {
-    async.parallel({
-      entities: function(callback) {
-        alchemy.entities(url, {}, function(err, response) {
-          if (err) {
-            callback(err);
-          }
-          const result = response.entities.filter(element => {
-            return element.relevance > 0.3;
+    return new Promise((resolve, reject) => {
+      async.parallel({
+        entities: function(callback) {
+          alchemy.entities(url, {}, function(err, response) {
+            if (err) {
+              callback(err);
+            }
+            const result = response.entities.filter(element => {
+              return element.relevance > 0.3;
+            });
+            callback(null, result);
           });
-          callback(null, result);
-        });
-      },
-      concepts: function(callback) {
-        alchemy.concepts(url, {}, function(err, response) {
-          if (err) {
-            callback(err);
-          }
-          const result = response.concepts.slice(1, 3);
-          callback(null, result);
-        });
-      },
-      author: function(callback) {
-        alchemy.author(url, {}, function(err, response) {
-          if (err) {
-            callback(err);
-          }
-          callback(null, response.author);
-        });
-      },
-      relations: function(callback) {
-        alchemy.relations(url, {}, function(err, response) {
-          if (err) {
-            callback(err);
-          }
-          callback(null, response.relations);
-        });
-      }
-    }, (err, result) => {
-      if (err) {
-        return console.log(err);
-      }
-      console.log(result);
+        },
+        concepts: function(callback) {
+          alchemy.concepts(url, {}, function(err, response) {
+            if (err) {
+              callback(err);
+            }
+            const result = response.concepts.slice(1, 3);
+            callback(null, result);
+          });
+        },
+        author: function(callback) {
+          alchemy.author(url, {}, function(err, response) {
+            if (err) {
+              callback(err);
+            }
+            callback(null, response.author);
+          });
+        },
+        relations: function(callback) {
+          alchemy.relations(url, {}, function(err, response) {
+            if (err) {
+              callback(err);
+            }
+            callback(null, response.relations);
+          });
+        },
+        emotion: function(callback) {
+          request('http://gateway-a.watsonplatform.net/calls/url/URLGetEmotion' +
+            `?apikey=${process.env.ALCHEMY_API_KEY}` +
+            `&url=${encodeURI(url)}&outputMode=json`,
+          (err, response, body) => {
+            if (err || response.statusCode !== 200) {
+              reject(console.log(err || response.statusCode));
+            }
+            callback(null, JSON.parse(body).docEmotions);
+          });
+        }
+      }, (err, result) => {
+        if (err) {
+          reject(console.log(err));
+        }
+        resolve(result);
+      });
     });
   }
+
   /**
    * Get results for an analyzed URL.
-   * @param  {[type]} req [description]
-   * @param  {[type]} res [description]
+   * @param  {Object} req [description]
+   * @param  {Object} res [description]
    */
   function getAnalyzedURL(req, res) {
     console.log(req);

@@ -1,13 +1,14 @@
 <!doctype html>
 <html>
   <head>
-    <img class="icon" src="images/icon.png" alt="Icon">
     <title>Content Analyzer</title>
+
     <!-- Libraries -->
     <script src="js/libraries/jquery-1.12.1.min.js"></script>
     <script src="js/libraries/gauge.min.js"></script>
     <script src="js/libraries/spin.min.js"></script>
     <script src="js/libraries/jquery.barrating.js"></script>
+
     <!-- Custom Scripts -->
     <script src="js/settings.js"></script>
     <script src="js/popup.js"></script>
@@ -19,7 +20,10 @@
 
   </head>
   <body>
-    <h1 class="text-center">Content Analyzer</h1>
+    <div class="header">
+      <img class="icon logo" src="images/icon.png" alt="Icon">
+      <h1 class="text-center logo-text">Content Analyzer</h1>
+    </div>
     <!-- <button id="checkPage">Check this page now!</button> -->
     <div class="statistics text-center">
       <div id="spinner">
@@ -38,6 +42,9 @@
             <option value="4">4</option>
             <option value="5">5</option>
           </select>
+        </div>
+        <div class="result">
+          <span class="stat-title font-large">Emotion</span>
         </div>
         <p id="response">Response Time: <span id="responseTime"></span> ms</p>
       </div>

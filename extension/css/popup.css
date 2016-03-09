@@ -5,12 +5,6 @@ canvas {
   max-width: 8em;
   max-height: 4em;
 }
-.icon {
-  max-width: 4em;
-  max-height: 4em;
-  margin: 0 auto;
-  display: block;
-}
 /* Text Styling */
 h1 {
   margin-top: 0.1em;
@@ -32,69 +26,39 @@ h2 {
 }
 .stat-title {
   vertical-align: top;
-  margin-top: 1.2em;
+  margin-top: 0.4em;
   display: inline-block;
+  padding-bottom: 0.2em;
 }
 .result {
+  vertical-align: top;
   display: inline-block;
-  width: 49%;
+  width: 32%;
 }
-/*#spinner {
-  width: 2em;
-  height: 2em;
-}*/
-.rating {
-    float:left;
+/*
+* Logo and text
+*/
+.header {
+  margin-bottom: 0.3em;
 }
-
-/* :not(:checked) is a filter, so that browsers that don’t support :checked don’t
-   follow these rules. Every browser that supports :checked also supports :not(), so
-   it doesn’t make the test unnecessarily selective */
-.rating:not(:checked) > input {
-    position:absolute;
-    top:-9999px;
-    clip:rect(0,0,0,0);
+.logo {
+  display: inline-block;
+  vertical-align: top;
 }
-
-.rating:not(:checked) > label {
-    float:right;
-    width:1em;
-    padding:0 .1em;
-    overflow:hidden;
-    white-space:nowrap;
-    cursor:pointer;
-    font-size:200%;
-    line-height:1.2;
-    color:#ddd;
-    text-shadow:1px 1px #bbb, 2px 2px #666, .1em .1em .2em rgba(0,0,0,.5);
+.icon {
+  max-width: 4em;
+  max-height: 4em;
+  margin: 0 auto;
+  display: block;
 }
-
-.rating:not(:checked) > label:before {
-    content: '★ ';
+.logo-text {
+  display: inline-block;
+  vertical-align: top;
+  padding: 0.3em 0 0 0.3em;
 }
-
-.rating > input:checked ~ label {
-    color: #f70;
-    text-shadow:1px 1px #c60, 2px 2px #940, .1em .1em .2em rgba(0,0,0,.5);
-}
-
-.rating:not(:checked) > label:hover,
-.rating:not(:checked) > label:hover ~ label {
-    color: gold;
-    text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
-}
-
-.rating > input:checked + label:hover,
-.rating > input:checked + label:hover ~ label,
-.rating > input:checked ~ label:hover,
-.rating > input:checked ~ label:hover ~ label,
-.rating > label:hover ~ input:checked ~ label {
-    color: #ea0;
-    text-shadow:1px 1px goldenrod, 2px 2px #B57340, .1em .1em .2em rgba(0,0,0,.5);
-}
-
-.rating > label:active {
-    position:relative;
-    top:2px;
-    left:2px;
+/*
+* Star Rating
+*/
+.br-wrapper {
+  padding-top: 1em;
 }
