@@ -211,7 +211,11 @@ const AnalysisMethods = function() {
                   highestVal = result[emotion];
                 }
               });
-              callback(null, {type: highestEmo, value: highestVal});
+              callback(null, {
+                highest: highestEmo,
+                value: highestVal,
+                all: result
+              });
             });
         }
       }, (err, result) => {
