@@ -3,11 +3,20 @@
   <head>
     <img class="icon" src="images/icon.png" alt="Icon">
     <title>Content Analyzer</title>
+    <!-- Libraries -->
+    <script src="js/libraries/jquery-1.12.1.min.js"></script>
     <script src="js/libraries/gauge.min.js"></script>
     <script src="js/libraries/spin.min.js"></script>
+    <script src="js/libraries/jquery.barrating.js"></script>
+    <!-- Custom Scripts -->
     <script src="js/settings.js"></script>
     <script src="js/popup.js"></script>
+
+    <!-- CSS Style Sheets -->
     <link rel="stylesheet" type="text/css" href="css/popup.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/fontawesome-stars.css">
+
   </head>
   <body>
     <h1 class="text-center">Content Analyzer</h1>
@@ -16,14 +25,19 @@
       <div id="spinner">
       </div>
       <div id="results">
-        <h2>Statistics</h2>
         <div class="result">
           <span class="stat-title font-large">Sentiment</span>
           <canvas id="sentiment"></canvas>
         </div>
         <div class="result">
           <span class="stat-title font-large">Language</span>
-          <canvas id="writing"></canvas>
+          <select id="example">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
         </div>
         <p id="response">Response Time: <span id="responseTime"></span> ms</p>
       </div>

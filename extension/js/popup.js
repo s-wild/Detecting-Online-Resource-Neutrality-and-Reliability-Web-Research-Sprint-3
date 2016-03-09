@@ -48,10 +48,12 @@ function postTabURL() {
           xmlhttp.onreadystatechange = function() {
               if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                   // Parse JSON from URL... May need updating when we return JSON instead of text.
-                  var responseValues = JSON.parse(xmlhttp.responseText);
-                  sentimentValue = responseValues.sentiment;
-                  console.log("responseValues", sentimentValue);
+                  const responseValues = JSON.parse(xmlhttp.responseText);
+                  var sentimentValue = responseValues.sentiment;
+                  var spellingValue = responseValues.spelling;
+                  console.log("responseValues", responseValues);
                   gaugeGenerator(sentimentValue, "sentiment");
+                  spellingRatingGenerator(spellingValue);
                   showResults();
                   // Response time.
                   var request_time = new Date().getTime() - start_time;
@@ -113,6 +115,18 @@ function gaugeGenerator(value, type){
     gauge.set(value); // set actual value
   }
 }
+function spellingRatingGenerator(spellingValue) {
+  console.log("spellingValue", spellingValue);
+  var starValue = spellingValue*5;
+  console.log("starValue", starValue);
+  $('#example').barrating({
+    theme: 'fontawesome-stars'
+  });
+  $('#example').barrating('set', starValue);
+}
+/*
+* Actiivity loader.
+*/
 function activityIndicator() {
   var opts = {
     lines: 13, // The number of lines to draw
