@@ -10,6 +10,8 @@ const async = require('async');
 
 const alchemy = new AlchemyAPI(process.env.ALCHEMY_API_KEY);
 const errorCodes = require('../lib/ErrorCodes');
+const ReliabilityEngine = require('./reliability');
+const reliability = new ReliabilityEngine();
 
 const AnalysisMethods = function() {
   /**
@@ -31,6 +33,10 @@ const AnalysisMethods = function() {
         let dataPromise = analyzeContent(url, body);
         dataPromise.then(result => {
           res.send(result);
+        }, error => {
+          console.log(error);
+          res.status(errorCodes.server.code);
+          res.send(`${errorCodes.server.message}: ${error}`);
         });
       }
     };
@@ -48,6 +54,7 @@ const AnalysisMethods = function() {
     const body = JSON.parse(rbody);
     const text = striptags(body.content).replace(/(\r\n|\n|\r)/gm, " ");
     const alchemyPromise = processAlchemy(url);
+
     return new Promise((resolve, reject) => {
       alchemyPromise.then((res, rej) => {
         if (rej) {
@@ -58,7 +65,8 @@ const AnalysisMethods = function() {
           sentiment: calculateSentiment(text),
           warnings: proofRead(text),
           spelling: analyzeSpelling(text),
-          alchemy: res
+          alchemy: res,
+          reliability: reliability.processRating(res.relations)
         };
         resolve(data);
       });
@@ -69,7 +77,7 @@ const AnalysisMethods = function() {
    * Calculate a percentage sentiment rating.
    * From 0 (very negative) to 100 (very positive).
    * @param  {String} text  Input body text to be analyzed.
-   * @return {number}          Text positivity percentage.
+   * @return {Number}          Text positivity percentage.
    */
   function calculateSentiment(text) {
     const result = sentiment(text);
@@ -158,8 +166,8 @@ const AnalysisMethods = function() {
   function processAlchemy(url) {
     return new Promise((resolve, reject) => {
       async.parallel({
-        entities: function(callback) {
-          alchemy.entities(url, {}, function(err, response) {
+        entities: callback => {
+          alchemy.entities(url, {}, (err, response) => {
             if (err) {
               callback(err);
             }
@@ -169,8 +177,8 @@ const AnalysisMethods = function() {
             callback(null, result);
           });
         },
-        concepts: function(callback) {
-          alchemy.concepts(url, {}, function(err, response) {
+        concepts: callback => {
+          alchemy.concepts(url, {}, (err, response) => {
             if (err) {
               callback(err);
             }
@@ -178,23 +186,40 @@ const AnalysisMethods = function() {
             callback(null, result);
           });
         },
-        author: function(callback) {
-          alchemy.author(url, {}, function(err, response) {
+        author: callback => {
+          alchemy.author(url, {}, (err, response) => {
             if (err) {
               callback(err);
             }
             callback(null, response.author);
           });
         },
-        relations: function(callback) {
-          alchemy.relations(url, {}, function(err, response) {
+        relations: callback => {
+          alchemy.relations(url, {}, (err, response) => {
             if (err) {
               callback(err);
             }
             callback(null, response.relations);
           });
         },
-        emotion: function(callback) {
+        sentiment: callback => {
+          alchemy.sentiment(url, {}, (err, response) => {
+            if (err) {
+              callback(err);
+            }
+            let data = response.docSentiment;
+            let sentimentPercent;
+            if (data.type === 'neutral') {
+              sentimentPercent = 50;
+            } else if (data.type === 'positive') {
+              sentimentPercent = 50 + (data.score * 50);
+            } else {
+              sentimentPercent = 50 - (data.score * 50);
+            }
+            callback(null, sentimentPercent);
+          });
+        },
+        emotion: callback => {
           request('http://gateway-a.watsonplatform.net/calls/url/URLGetEmotion' +
             `?apikey=${process.env.ALCHEMY_API_KEY}` +
             `&url=${encodeURI(url)}&outputMode=json`,
