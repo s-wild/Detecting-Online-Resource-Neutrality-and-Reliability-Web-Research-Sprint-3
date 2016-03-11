@@ -52,7 +52,6 @@ const ReliabilityEngine = function() {
               throw err;
             }
             if (res.length < 1) {
-              // Create a new subject with relation
               addSubject(r, callback);
             } else {
               callback(null, true);
@@ -64,14 +63,13 @@ const ReliabilityEngine = function() {
           db.cypher({
             query: 'MATCH (o:Object {name: {subject}}) RETURN o',
             params: {
-              subject: r.subject.text
+              subject: r.object.text
             }
           }, (err, res) => {
             if (err) {
               throw err;
             }
             if (res.length < 1) {
-              // Create a new subject with relation!
               addObject(r, callback);
             } else {
               callback(null, true);
@@ -84,12 +82,14 @@ const ReliabilityEngine = function() {
           }
           // Check if we know both things. If so, we might have a relation!
           if (results[0] && results[1]) {
-            // checkRelation(r);
-          } else {
-            // We were missing something. Ah well, let's define a relation.
-            addRelation(r);
+            console.log('Sweet, those exist!');
+            return 90;
+          }
+          // We were missing something. Ah well, let's define a relation.
+          var callback = function() {
             return DEFAULT_RELIABILITY;
           }
+          addRelation(r, domain, callback);
         });
     }
   }
@@ -133,16 +133,18 @@ const ReliabilityEngine = function() {
   }
 
   /**
-   * Add a new subject to the database.
-   * @param  {Object}   r       Relation to create.
-   * @param  {String}   domain  Domain of this relation.
-   * @param  {Function} callback
+   * Add a new relation to the database.
+   * @param  {Object}   r         Relation to create.
+   * @param  {String}   domain    Domain of this relation.
+   * @param  {Function} callback  Run to signal process completed.
+   * MATCH (s:Subject), (o:Object) WHERE s.name = 'Britain'  AND o.name = 'into effect'
+   * MERGE (s)-[:LINKED {action: 'pay', domain: 'google'}]->(o)
    */
   function addRelation(r, domain, callback) {
     db.cypher({
-      query: `MATCH (s:Subject), (o:Object)
-        WHERE s.name = {subjectName} AND o.name = {objectName}
-        CREATE (s)-[:LINKED {
+      query: `MATCH (s:Subject {name:{subjectName}})
+        MATCH (o:Object {name: {objectName}})
+        CREATE UNIQUE (s)-[l:LINKED {
           action: {action},
           domain: {domain}
         }]->(o)`,
@@ -158,6 +160,19 @@ const ReliabilityEngine = function() {
       }
       callback(null);
     });
+  }
+
+  /**
+   * Check to see the actions between the two objects, if any.
+   * If this is the only domain to report the action, return default.
+   * If the connection is made already, return high reliability.
+   * If no connection, create a new relationship.
+   * @param  {Object} r      [description]
+   * @param  {String} domain [description]
+   * @return {Number}        [description]
+   */
+  function checkRelation(r, domain) {
+    return 60;
   }
 
   return {
