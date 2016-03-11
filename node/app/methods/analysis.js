@@ -52,6 +52,7 @@ const AnalysisMethods = function() {
    */
   function analyzeContent(url, rbody) {
     const body = JSON.parse(rbody);
+    const domain = url.split('/')[2];
     const text = striptags(body.content).replace(/(\r\n|\n|\r)/gm, " ");
     const alchemyPromise = processAlchemy(url);
 
@@ -66,7 +67,7 @@ const AnalysisMethods = function() {
           warnings: proofRead(text),
           spelling: analyzeSpelling(text),
           alchemy: res,
-          reliability: reliability.processRating(res.relations)
+          reliability: reliability.processRating(res.relations, domain)
         };
         resolve(data);
       });
