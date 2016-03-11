@@ -9,7 +9,10 @@
     "lint": "eslint -c .eslintrc.js app"
   },
   "keywords": [
-    "node",
+    "reliability",
+    "article",
+    "analysis",
+    "alchemy",
     "api",
     "chrome",
     "extension"
@@ -39,6 +42,7 @@
     "body-parser": "^1.15.0",
     "dotenv": "^2.0.0",
     "express": "^4.13.4",
+    "neo4j": "^2.0.0-RC2",
     "request": "^2.69.0",
     "rousseau": "^1.0.4",
     "sentiment": "^1.0.6",

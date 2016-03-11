@@ -1,5 +1,11 @@
-
+# Node dependencies
 node/node_modules
-node/.env
 
+# Environment variables
+.env
+
+# Log files
 *.log
+
+# Mac
+.DS_Store
