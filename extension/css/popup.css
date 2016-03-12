@@ -80,3 +80,31 @@ h2 {
   padding-bottom: 0.9em;
   padding-top: 0.2em;
 }
+/*
+* Actors
+*/
+#actors {
+  font-size: 1.3em;
+}
+.actors {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+.btn {
+  display: inline-block;
+  border: 0.1em solid #000;
+  border-radius: 0.3em;
+  padding: 0.1em 0.3em;
+  margin: 0.1em;
+}
+.btn:hover {
+  background: #000;
+  color: #fff;
+}
+/*
+* Results
+*/
+.block {
+  display: block;
+  width: 100%;
+}

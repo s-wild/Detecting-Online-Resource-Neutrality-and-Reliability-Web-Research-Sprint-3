@@ -53,10 +53,12 @@ function postTabURL() {
                   var spellingValue = responseValues.spelling;
                   var emotionType = responseValues.alchemy.emotion.highest;
                   var emotionValue = responseValues.alchemy.emotion.value;
+                  var entitiesObejct = responseValues.alchemy.entities;
                   console.log("responseValues", responseValues);
                   gaugeGenerator(sentimentValue, "sentiment");
                   spellingRatingGenerator(spellingValue);
                   generateEmoji(emotionType, emotionValue);
+                  generateEntities(entitiesObejct);
                   showResults();
                   // Response time.
                   var request_time = new Date().getTime() - start_time;
@@ -107,7 +109,6 @@ function gaugeGenerator(value, type){
       default:
           console.log("Can't calculate value.");
   }
-
   var opts = {
     lines: 12, // The number of lines to draw
     angle: 0.15, // The length of each line
@@ -201,7 +202,6 @@ function generateEmoji(emotionType, emotionValue) {
     default:
         console.log("no match...");
   }
-
 }
 /*
 * Actiivity loader.
@@ -232,6 +232,75 @@ function activityIndicator() {
   var target = document.getElementById('spinner');
   var spinner = new Spinner(opts).spin(target);
 }
+/*
+* Generate actors.
+*/
+function generateEntities(entitiesObejct) {
+  // Loop through objects, detect type.
+  for (var key in entitiesObejct) {
+    // skip loop if the property is from prototype
+    if (!entitiesObejct.hasOwnProperty(key)) continue;
+
+    var obj = entitiesObejct[key];
+    var entityType = obj.type;
+    var entityValue = obj.text;
+    // @TODO This creates a bug if URL does not exist.
+    //var dbPediaURL = obj.disambiguated.dbpedia;
+
+    var dbPediaURL = "#";
+
+     // Check if organisation.
+     if (entityType === "Organization") {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+       '<div class="btn"><i class="fa fa-university"></i> ' +
+       entityValue + '</div></a>');
+     }
+     // Check if person.
+     else if (entityType === "Person") {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+         '<div class="btn"><i class="fa fa-user"></i> ' +
+       entityValue + '</div></a>');
+     }
+     // Check if Country.
+     else if (entityType === "Country") {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+         '<div class="btn"><i class="fa fa-globe"></i> ' +
+       entityValue + '</div></a>');
+     }
+     // Check if job title
+     else if (entityType === "JobTitle") {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+         '<div class="btn"><i class="fa fa-briefcase"></i> ' +
+       entityValue + '</div></a>');
+     }
+     // Check if job title
+     else if (entityType === "Company") {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+         '<div class="btn"><i class="fa fa-building"></i> ' +
+       entityValue + '</div></a>');
+     }
+     else {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+       '<div class="btn"><i class="fa fa-question"></i> ' +
+       entityValue + '</div></a>');
+     }
+
+    console.log("object", entityValue);
+    // for (var prop in obj) {
+    //     // skip loop if the property is from prototype
+    //     if(!obj.hasOwnProperty(prop)) continue;
+    //     if () {
+    //
+    //     }
+    //
+    //     // your code
+    //     console.log(prop + " = " + obj[prop]);
+    // }
+}
+}
+/*
+* Actors
+*/
 function hideResults() {
   document.getElementById("results").style.display = 'none';
 }
