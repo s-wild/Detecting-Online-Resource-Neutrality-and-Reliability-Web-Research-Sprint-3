@@ -244,19 +244,48 @@ function generateEntities(entitiesObejct) {
     var obj = entitiesObejct[key];
     var entityType = obj.type;
     var entityValue = obj.text;
+    // @TODO This creates a bug if URL does not exist.
+    //var dbPediaURL = obj.disambiguated.dbpedia;
+
+    var dbPediaURL = "#";
+
+     // Check if organisation.
+     if (entityType === "Organization") {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+       '<div class="btn"><i class="fa fa-university"></i> ' +
+       entityValue + '</div></a>');
+     }
+     // Check if person.
+     else if (entityType === "Person") {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+         '<div class="btn"><i class="fa fa-user"></i> ' +
+       entityValue + '</div></a>');
+     }
+     // Check if Country.
+     else if (entityType === "Country") {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+         '<div class="btn"><i class="fa fa-globe"></i> ' +
+       entityValue + '</div></a>');
+     }
+     // Check if job title
+     else if (entityType === "JobTitle") {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+         '<div class="btn"><i class="fa fa-briefcase"></i> ' +
+       entityValue + '</div></a>');
+     }
+     // Check if job title
+     else if (entityType === "Company") {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+         '<div class="btn"><i class="fa fa-building"></i> ' +
+       entityValue + '</div></a>');
+     }
+     else {
+       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+       '<div class="btn"><i class="fa fa-question"></i> ' +
+       entityValue + '</div></a>');
+     }
+
     console.log("object", entityValue);
-    // Check if organisation.
-    if (entityType === "Organization") {
-      $( "#actors" ).append( '<span><i class="fa fa-university"></i> ' + entityValue + ', </span>');
-    }
-    // Check if organisation.
-    if (entityType === "Person") {
-      $( "#actors" ).append( '<span><i class="fa fa-user"></i> ' + entityValue + ', </span>');
-    }
-    // Check if organisation.
-    if (entityType === "Country") {
-      $( "#actors" ).append( '<span><i class="fa fa-globe"></i> ' + entityValue + ', </span>');
-    }
     // for (var prop in obj) {
     //     // skip loop if the property is from prototype
     //     if(!obj.hasOwnProperty(prop)) continue;
