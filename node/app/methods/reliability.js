@@ -14,19 +14,24 @@ const ReliabilityEngine = function() {
    * Establish database constraints.
    */
   function init() {
-    db.cypher({
-      query: `CREATE CONSTRAINT ON (s:Subject) ASSERT s.name IS UNIQUE`
-    }, error => {
-      if (error) {
-        throw new Error('Database could not be initialized!', error);
+    async.series([
+      callback => {
+        db.cypher({
+          query: `CREATE CONSTRAINT ON (s:Subject) ASSERT s.name IS UNIQUE`
+        }, error => {
+          callback(error ? error : null);
+        });
+      }, callback => {
+        db.cypher({
+          query: `CREATE CONSTRAINT ON (o:Object) ASSERT o.name IS UNIQUE`
+        }, error => {
+          callback(error ? error : null);
+        });
       }
-      db.cypher({
-        query: `CREATE CONSTRAINT ON (o:Object) ASSERT o.name IS UNIQUE`
-      }, error => {
-        if (error) {
-          throw new Error('Database could not be initialized!', error);
-        }
-      });
+    ], error => {
+      if (error) {
+        throw new Error('Database could not be constrained! AAAAH!', error);
+      }
     });
   }
   /**
@@ -122,6 +127,7 @@ const ReliabilityEngine = function() {
             } else {
               // We know them both! Are they related, and says who?
               console.log('Sweet, those exist!');
+              checkRelation(r, domain);
               resolve(90);
             }
           });
