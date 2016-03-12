@@ -53,10 +53,12 @@ function postTabURL() {
                   var spellingValue = responseValues.spelling;
                   var emotionType = responseValues.alchemy.emotion.highest;
                   var emotionValue = responseValues.alchemy.emotion.value;
+                  var entitiesObejct = responseValues.alchemy.entities;
                   console.log("responseValues", responseValues);
                   gaugeGenerator(sentimentValue, "sentiment");
                   spellingRatingGenerator(spellingValue);
                   generateEmoji(emotionType, emotionValue);
+                  generateEntities(entitiesObejct);
                   showResults();
                   // Response time.
                   var request_time = new Date().getTime() - start_time;
@@ -107,7 +109,6 @@ function gaugeGenerator(value, type){
       default:
           console.log("Can't calculate value.");
   }
-
   var opts = {
     lines: 12, // The number of lines to draw
     angle: 0.15, // The length of each line
@@ -201,7 +202,6 @@ function generateEmoji(emotionType, emotionValue) {
     default:
         console.log("no match...");
   }
-
 }
 /*
 * Actiivity loader.
@@ -232,6 +232,46 @@ function activityIndicator() {
   var target = document.getElementById('spinner');
   var spinner = new Spinner(opts).spin(target);
 }
+/*
+* Generate actors.
+*/
+function generateEntities(entitiesObejct) {
+  // Loop through objects, detect type.
+  for (var key in entitiesObejct) {
+    // skip loop if the property is from prototype
+    if (!entitiesObejct.hasOwnProperty(key)) continue;
+
+    var obj = entitiesObejct[key];
+    var entityType = obj.type;
+    var entityValue = obj.text;
+    console.log("object", entityValue);
+    // Check if organisation.
+    if (entityType === "Organization") {
+      $( "#actors" ).append( '<span><i class="fa fa-university"></i> ' + entityValue + ', </span>');
+    }
+    // Check if organisation.
+    if (entityType === "Person") {
+      $( "#actors" ).append( '<span><i class="fa fa-user"></i> ' + entityValue + ', </span>');
+    }
+    // Check if organisation.
+    if (entityType === "Country") {
+      $( "#actors" ).append( '<span><i class="fa fa-globe"></i> ' + entityValue + ', </span>');
+    }
+    // for (var prop in obj) {
+    //     // skip loop if the property is from prototype
+    //     if(!obj.hasOwnProperty(prop)) continue;
+    //     if () {
+    //
+    //     }
+    //
+    //     // your code
+    //     console.log(prop + " = " + obj[prop]);
+    // }
+}
+}
+/*
+* Actors
+*/
 function hideResults() {
   document.getElementById("results").style.display = 'none';
 }

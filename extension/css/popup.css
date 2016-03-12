@@ -80,3 +80,20 @@ h2 {
   padding-bottom: 0.9em;
   padding-top: 0.2em;
 }
+/*
+* Actors
+*/
+#actors {
+  font-size: 1.3em;
+}
+.actors {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+/*
+* Results
+*/
+.block {
+  display: block;
+  width: 100%;
+}
