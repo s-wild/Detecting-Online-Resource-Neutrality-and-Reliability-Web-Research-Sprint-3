@@ -21,7 +21,8 @@ const ReliabilityEngine = function() {
         }, error => {
           callback(error ? error : null);
         });
-      }, callback => {
+      },
+      callback => {
         db.cypher({
           query: `CREATE CONSTRAINT ON (o:Object) ASSERT o.name IS UNIQUE`
         }, error => {
@@ -51,13 +52,16 @@ const ReliabilityEngine = function() {
     }
     return new Promise((resolve, reject) => {
       if (relations < 1) {
-        resolve({alchemy, reliability: DEFAULT_RELIABILITY});
+        resolve({
+          alchemy,
+          reliability: DEFAULT_RELIABILITY
+        });
       }
       Promise.all(promises).then(values => {
         var reliability = values.reduce((a, b) => {
           return a + b;
         }) / relations.length;
-        // If we really thought that was reliabily, return max.
+        // If we really thought that was reliable, return max.
         reliability = reliability > 99 ? 99 : reliability;
         resolve({
           alchemy,
@@ -79,60 +83,60 @@ const ReliabilityEngine = function() {
    */
   function processRelation(r, domain) {
     return new Promise((resolve, reject) => {
-      if (r.subject && r.action && r.object) {
-        async.parallel([
-          // First, find if we know this subject!
-          callback => {
-            db.cypher({
-              query: `MERGE (s:Subject {name: {subject}})
-                ON CREATE SET s.created = true
-                ON MATCH SET s.created = false
-                RETURN s`,
-              params: {
-                subject: r.subject.text
-              }
-            }, (err, results) => {
-              if (err) {
-                callback(err);
-              }
-              let result = results[0];
-              callback(null, result.s.properties.created);
-            });
-          },
-          // At the same time, check if we know the object...
-          callback => {
-            db.cypher({
-              query: `MERGE (o:Object {name: {subject}})
-                ON CREATE SET o.created = true
-                ON MATCH SET o.created = false
-                RETURN o`,
-              params: {
-                subject: r.object.text
-              }
-            }, (err, results) => {
-              if (err) {
-                callback(err);
-              }
-              let result = results[0];
-              callback(null, result.o.properties.created);
-            });
-          }],
-          (err, created) => {
-            if (err) {
-              reject(err);
-            }
-            if (created[0] || created[1]) {
-              // Was either thing new? It can't be related :-(
-              addRelation(r, domain);
-              resolve(DEFAULT_RELIABILITY);
-            } else {
-              // We know them both! Are they related, and says who?
-              checkRelationship(r, domain, resolve);
-            }
-          });
-      } else {
+      if (!(r.subject && r.action && r.object)) {
         resolve(DEFAULT_RELIABILITY);
       }
+      async.parallel([
+        // First, find if we know this subject!
+        callback => {
+          db.cypher({
+            query: `MERGE (s:Subject {name: {subject}})
+            ON CREATE SET s.created = true
+            ON MATCH SET s.created = false
+            RETURN s`,
+            params: {
+              subject: r.subject.text
+            }
+          }, (err, results) => {
+            if (err) {
+              callback(err);
+            }
+            let result = results[0];
+            callback(null, result.s.properties.created);
+          });
+        },
+        // At the same time, check if we know the object...
+        callback => {
+          db.cypher({
+            query: `MERGE (o:Object {name: {subject}})
+            ON CREATE SET o.created = true
+            ON MATCH SET o.created = false
+            RETURN o`,
+            params: {
+              subject: r.object.text
+            }
+          }, (err, results) => {
+            if (err) {
+              callback(err);
+            }
+            let result = results[0];
+            callback(null, result.o.properties.created);
+          });
+        }
+      ],
+      (err, created) => {
+        if (err) {
+          reject(err);
+        }
+        if (created[0] || created[1]) {
+          // Was either thing new? It can't be related.
+          addRelation(r, domain);
+          resolve(DEFAULT_RELIABILITY);
+        } else {
+          // We know them both! Are they related, and says who?
+          checkRelationship(r, domain, resolve);
+        }
+      });
     });
   }
 
