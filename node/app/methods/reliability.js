@@ -51,7 +51,7 @@ const ReliabilityEngine = function() {
     }
     return new Promise((resolve, reject) => {
       if (relations < 1) {
-        resolve({alchemy, reliability: 30});
+        resolve({alchemy, reliability: DEFAULT_RELIABILITY});
       }
       Promise.all(promises).then(values => {
         var reliability = values.reduce((a, b) => {
