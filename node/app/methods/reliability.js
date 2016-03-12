@@ -11,6 +11,25 @@ const DEFAULT_RELIABILITY = 60;
 
 const ReliabilityEngine = function() {
   /**
+   * Establish database constraints.
+   */
+  function init() {
+    db.cypher({
+      query: `CREATE CONSTRAINT ON (s:Subject) ASSERT s.name IS UNIQUE`
+    }, error => {
+      if (error) {
+        throw new Error('Database could not be initialized!', error);
+      }
+      db.cypher({
+        query: `CREATE CONSTRAINT ON (o:Object) ASSERT o.name IS UNIQUE`
+      }, error => {
+        if (error) {
+          throw new Error('Database could not be initialized!', error);
+        }
+      });
+    });
+  }
+  /**
    * Calculate an average reliability rating over all relations in the text.
    * Based on the number of similiar relations made in different domains.
    * @param  {Array}  alchemy  Array of relations from Alchemy API.
@@ -58,96 +77,57 @@ const ReliabilityEngine = function() {
           // First, find if we know this subject!
           callback => {
             db.cypher({
-              query: 'MATCH (s:Subject {name: {subject}}) RETURN s',
+              query: `MERGE (s:Subject {name: {subject}})
+                ON CREATE SET s.created = true
+                ON MATCH SET s.created = false
+                RETURN s`,
               params: {
                 subject: r.subject.text
               }
-            }, (err, res) => {
+            }, (err, results) => {
               if (err) {
                 callback(err);
               }
-              if (res.length < 1) {
-                addSubject(r, callback);
-              } else {
-                callback(null, true);
-              }
+              let result = results[0];
+              callback(null, result.s.properties.created);
             });
           },
           // At the same time, check if we know the object...
           callback => {
             db.cypher({
-              query: 'MATCH (o:Object {name: {subject}}) RETURN o',
+              query: `MERGE (o:Object {name: {subject}})
+                ON CREATE SET o.created = true
+                ON MATCH SET o.created = false
+                RETURN o`,
               params: {
                 subject: r.object.text
               }
             }, (err, results) => {
-              var result = results[0];
               if (err) {
                 callback(err);
               }
-              if (result) {
-                callback(null, true);
-              } else {
-                addObject(r, callback);
-              }
+              let result = results[0];
+              callback(null, result.o.properties.created);
             });
           }],
-          (err, results) => {
+          (err, created) => {
             if (err) {
               reject(err);
             }
-            // Check if we know both things. If so, we might have a relation!
-            if (results[0] && results[1]) {
-              console.log('Sweet, those exist!');
-              resolve(90);
-            } else {
-              // We were missing something. Ah well, let's define a relation.
+            // Was either thing new? It can't be related :-(
+            if (created[0] || created[1]) {
               addRelation(r, domain);
               console.log('returning', DEFAULT_RELIABILITY);
               resolve(DEFAULT_RELIABILITY);
+            } else {
+              // We know them both! Are they related, and says who?
+              console.log('Sweet, those exist!');
+              resolve(90);
             }
           });
       } else {
         resolve(DEFAULT_RELIABILITY);
       }
-    });
-  }
-
-  /**
-   * [addSubject description]
-   * @param {[type]}   r        [description]
-   * @param {Function} callback [description]
-   */
-  function addSubject(r, callback) {
-    db.cypher({
-      query: 'MERGE (s:Subject {name: {subjectName}})',
-      params: {
-        subjectName: r.subject.text
-      }
-    }, err => {
-      if (err) {
-        callback(err);
-      }
-      callback(null, false);
-    });
-  }
-
-  /**
-   * Add object to DB.
-   * @param {Object}   r        Relation.
-   * @param {Function} callback For completion.
-   */
-  function addObject(r, callback) {
-    db.cypher({
-      query: 'MERGE (o:Object {name: {objectName}})',
-      params: {
-        objectName: r.object.text
-      }
-    }, err => {
-      if (err) {
-        callback(err);
-      }
-      callback(null, false);
     });
   }
 
@@ -159,8 +139,8 @@ const ReliabilityEngine = function() {
    */
   function addRelation(r, domain) {
     db.cypher({
-      query: `MERGE (s:Subject {name:{subjectName}})
-        MERGE (o:Object {name: {objectName}})
+      query: `MATCH (s:Subject {name:{subjectName}})
+        MATCH (o:Object {name: {objectName}})
         CREATE UNIQUE (s)-[l:LINKED {
           action: {action},
           domain: {domain}
@@ -190,6 +170,8 @@ const ReliabilityEngine = function() {
   function checkRelation(r, domain) {
     return 90;
   }
+
+  init();
 
   return {
     processRating
