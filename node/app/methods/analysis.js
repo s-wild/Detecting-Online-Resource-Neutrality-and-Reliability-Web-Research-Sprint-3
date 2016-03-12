@@ -21,6 +21,7 @@ const AnalysisMethods = function() {
    */
   function analyzeURL(req, res) {
     const url = req.body.url;
+    console.log('Received request to process', url);
     const handleResponse = (error, response, body) => {
       if (error || response.statusCode !== 200) {
         res.status(errorCodes.server.code);
@@ -30,8 +31,10 @@ const AnalysisMethods = function() {
           response.statusCode);
       }
       if (response.statusCode === 200) {
+        console.log('Readability API success!');
         let dataPromise = analyzeContent(url, body);
         dataPromise.then(result => {
+          console.log('Request processed! \n');
           res.send(result);
         }, error => {
           console.log(error);
@@ -51,13 +54,13 @@ const AnalysisMethods = function() {
    * @return {Object}   data    Results of analysis.
    */
   function analyzeContent(url, rbody) {
+    console.log('Performing analysis...');
     const body = JSON.parse(rbody);
-    const domain = url.split('/')[2];
     const text = striptags(body.content).replace(/(\r\n|\n|\r)/gm, " ");
-    const alchemyPromise = processAlchemy(url);
-
+    const reliabilityPromise = processAlchemy(url)
+      .then(reliability.processRating);
     return new Promise((resolve, reject) => {
-      alchemyPromise.then((res, rej) => {
+      reliabilityPromise.then((res, rej) => {
         if (rej) {
           reject(rej);
         }
@@ -66,8 +69,8 @@ const AnalysisMethods = function() {
           sentiment: calculateSentiment(text),
           warnings: proofRead(text),
           spelling: analyzeSpelling(text),
-          alchemy: res,
-          reliability: reliability.processRating(res.relations, domain)
+          alchemy: res.alchemy,
+          reliability: res.reliability
         };
         resolve(data);
       });
@@ -116,9 +119,9 @@ const AnalysisMethods = function() {
       results.forEach(suggestion => {
         warnings.push(suggestion.type);
       });
-      warnings = warnings.reduce(function(countMap, word) {
-        countMap[word] = ++countMap[word] || 1;
-        return countMap;
+      warnings = warnings.reduce(function(cMap, word) {
+        cMap[word] = ++cMap[word] || 1;
+        return cMap;
       }, {});
     });
     if (warnings.simplicity > 1) {
@@ -165,6 +168,7 @@ const AnalysisMethods = function() {
    * @return {Promise}        Promise to fulfill on API completion.
    */
   function processAlchemy(url) {
+    console.log('Requesting data from Alchemy API...');
     return new Promise((resolve, reject) => {
       async.parallel({
         entities: callback => {
@@ -248,6 +252,7 @@ const AnalysisMethods = function() {
         if (err) {
           reject(console.log(err));
         }
+        result.domain = url.split('/')[2];
         resolve(result);
       });
     });

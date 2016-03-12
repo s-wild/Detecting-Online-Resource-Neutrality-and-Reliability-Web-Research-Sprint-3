@@ -7,27 +7,41 @@
 const db = require('../lib/db');
 const async = require('async');
 
-const DEFAULT_RELIABILITY = 50;
+const DEFAULT_RELIABILITY = 60;
 
 const ReliabilityEngine = function() {
   /**
    * Calculate an average reliability rating over all relations in the text.
    * Based on the number of similiar relations made in different domains.
-   * @param  {Array}  relations  Array of relations from Alchemy API.
+   * @param  {Array}  alchemy  Array of relations from Alchemy API.
    * @param  {String} domain     Domain of these relations.
    * @return {Number}            Averaged reliability index.
    */
-  function processRating(relations, domain) {
-    var total = 0;
+  function processRating(alchemy) {
+    console.log('Success. Performing reliability processing...');
+    const relations = alchemy.relations;
+    const domain = alchemy.domain;
+    var promises = [];
     for (var i = 0; i < relations.length; i++) {
-      try {
-        total += processRelation(relations[i], domain);
-      } catch (err) {
-        total += 50;
-        console.log(err);
-      }
+      promises.push(processRelation(relations[i], domain));
     }
-    return total / relations.length;
+    return new Promise((resolve, reject) => {
+      if (relations < 1) {
+        resolve({alchemy, reliability: 30});
+      }
+      Promise.all(promises).then(values => {
+        var reliability = values.reduce((a, b) => {
+          return a + b;
+        }) / relations.length;
+        resolve({
+          alchemy,
+          reliability
+        });
+      }, error => {
+        console.log(error);
+        reject(error);
+      });
+    });
   }
 
   /**
@@ -38,60 +52,65 @@ const ReliabilityEngine = function() {
    * @return {Number}         Reliability index.
    */
   function processRelation(r, domain) {
-    if (r.subject && r.action && r.object) {
-      async.parallel([
-        // First, find if we know this subject!
-        callback => {
-          db.cypher({
-            query: 'MATCH (s:Subject {name: {subject}}) RETURN s',
-            params: {
-              subject: r.subject.text
-            }
-          }, (err, res) => {
+    return new Promise((resolve, reject) => {
+      if (r.subject && r.action && r.object) {
+        async.parallel([
+          // First, find if we know this subject!
+          callback => {
+            db.cypher({
+              query: 'MATCH (s:Subject {name: {subject}}) RETURN s',
+              params: {
+                subject: r.subject.text
+              }
+            }, (err, res) => {
+              if (err) {
+                callback(err);
+              }
+              if (res.length < 1) {
+                addSubject(r, callback);
+              } else {
+                callback(null, true);
+              }
+            });
+          },
+          // At the same time, check if we know the object...
+          callback => {
+            db.cypher({
+              query: 'MATCH (o:Object {name: {subject}}) RETURN o',
+              params: {
+                subject: r.object.text
+              }
+            }, (err, results) => {
+              var result = results[0];
+              if (err) {
+                callback(err);
+              }
+              if (result) {
+                callback(null, true);
+              } else {
+                addObject(r, callback);
+              }
+            });
+          }],
+          (err, results) => {
             if (err) {
-              throw err;
+              reject(err);
             }
-            if (res.length < 1) {
-              addSubject(r, callback);
+            // Check if we know both things. If so, we might have a relation!
+            if (results[0] && results[1]) {
+              console.log('Sweet, those exist!');
+              resolve(90);
             } else {
-              callback(null, true);
+              // We were missing something. Ah well, let's define a relation.
+              addRelation(r, domain);
+              console.log('returning', DEFAULT_RELIABILITY);
+              resolve(DEFAULT_RELIABILITY);
             }
           });
-        },
-        // At the same time, check if we know the object...
-        callback => {
-          db.cypher({
-            query: 'MATCH (o:Object {name: {subject}}) RETURN o',
-            params: {
-              subject: r.object.text
-            }
-          }, (err, res) => {
-            if (err) {
-              throw err;
-            }
-            if (res.length < 1) {
-              addObject(r, callback);
-            } else {
-              callback(null, true);
-            }
-          });
-        }],
-        (err, results) => {
-          if (err) {
-            throw err;
-          }
-          // Check if we know both things. If so, we might have a relation!
-          if (results[0] && results[1]) {
-            console.log('Sweet, those exist!');
-            return 90;
-          }
-          // We were missing something. Ah well, let's define a relation.
-          var callback = function() {
-            return DEFAULT_RELIABILITY;
-          }
-          addRelation(r, domain, callback);
-        });
-    }
+      } else {
+        resolve(DEFAULT_RELIABILITY);
+      }
+    });
   }
 
   /**
@@ -114,9 +133,9 @@ const ReliabilityEngine = function() {
   }
 
   /**
-   * Add object to DB
+   * Add object to DB.
    * @param {Object}   r        Relation.
-   * @param {Function} callback
+   * @param {Function} callback For completion.
    */
   function addObject(r, callback) {
     db.cypher({
@@ -137,13 +156,11 @@ const ReliabilityEngine = function() {
    * @param  {Object}   r         Relation to create.
    * @param  {String}   domain    Domain of this relation.
    * @param  {Function} callback  Run to signal process completed.
-   * MATCH (s:Subject), (o:Object) WHERE s.name = 'Britain'  AND o.name = 'into effect'
-   * MERGE (s)-[:LINKED {action: 'pay', domain: 'google'}]->(o)
    */
-  function addRelation(r, domain, callback) {
+  function addRelation(r, domain) {
     db.cypher({
-      query: `MATCH (s:Subject {name:{subjectName}})
-        MATCH (o:Object {name: {objectName}})
+      query: `MERGE (s:Subject {name:{subjectName}})
+        MERGE (o:Object {name: {objectName}})
         CREATE UNIQUE (s)-[l:LINKED {
           action: {action},
           domain: {domain}
@@ -156,9 +173,8 @@ const ReliabilityEngine = function() {
       }
     }, err => {
       if (err) {
-        callback(err);
+        throw err;
       }
-      callback(null);
     });
   }
 
@@ -172,7 +188,7 @@ const ReliabilityEngine = function() {
    * @return {Number}        [description]
    */
   function checkRelation(r, domain) {
-    return 60;
+    return 90;
   }
 
   return {
