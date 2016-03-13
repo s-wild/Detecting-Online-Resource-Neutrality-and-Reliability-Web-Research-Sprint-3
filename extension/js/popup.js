@@ -49,7 +49,8 @@ function postTabURL() {
               if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                   // Parse JSON from URL... May need updating when we return JSON instead of text.
                   const responseValues = JSON.parse(xmlhttp.responseText);
-                  var sentimentValue = responseValues.sentiment;
+                  console.log("responseValues",responseValues);
+                  var sentimentValue = responseValues.alchemy.sentiment;
                   var spellingValue = responseValues.spelling;
                   var emotionType = responseValues.alchemy.emotion.highest;
                   var emotionValue = responseValues.alchemy.emotion.value;
@@ -90,6 +91,7 @@ function postTabURL() {
 function gaugeGenerator(value, type){
   // Check values and set text for sentiment.
   if (type == "sentiment") {
+    // Set test response based from values.
     switch(true) {
         case value > 70:
             console.log("Positive");
@@ -264,6 +266,7 @@ function activityIndicator() {
 * Generate actors.
 */
 function generateEntities(entitiesObejct) {
+  console.log("entitiesObejct",entitiesObejct);
   // Loop through objects, detect type.
   for (var key in entitiesObejct) {
     // skip loop if the property is from prototype
@@ -272,59 +275,85 @@ function generateEntities(entitiesObejct) {
     var obj = entitiesObejct[key];
     var entityType = obj.type;
     var entityValue = obj.text;
-    // @TODO This creates a bug if URL does not exist.
-    //var dbPediaURL = obj.disambiguated.dbpedia;
-
-    var dbPediaURL = "#";
+    var entityURL = "na";
+    if (obj.disambiguated) {
+      var entityDisambiguated = obj.disambiguated;
+      entityURL = entityDisambiguated.website
+    }
 
      // Check if organisation.
      if (entityType === "Organization") {
-       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
-       '<div class="btn"><i class="fa fa-university"></i> ' +
-       entityValue + '</div></a>');
+       if (entityURL != "na") {
+         $( "#actors" ).append( '<a href="' + entityURL + '" target="_blank">' +
+         '<div class="btn"><i class="fa fa-university"></i> ' +
+         entityValue + '</div></a>');
+       } else {
+         $( "#actors" ).append('<div class="btn"><i class="fa fa-university"></i> ' +
+         entityValue + '</div>');
+       }
+
      }
      // Check if person.
      else if (entityType === "Person") {
-       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+       // Check if URL exists.
+       if (entityURL != "na") {
+         $( "#actors" ).append( '<a href="' + entityURL + '" target="_blank">' +
          '<div class="btn"><i class="fa fa-user"></i> ' +
-       entityValue + '</div></a>');
+         entityValue + '</div></a>');
+       } else {
+         $( "#actors" ).append('<div class="btn"><i class="fa fa-user"></i> ' +
+         entityValue + '</div>');
+       }
      }
      // Check if Country.
      else if (entityType === "Country") {
-       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
+      // Check URL exists.
+      if (entityURL != "na") {
+         $( "#actors" ).append( '<a href="' + entityURL + '" target="_blank">' +
          '<div class="btn"><i class="fa fa-globe"></i> ' +
-       entityValue + '</div></a>');
+         entityValue + '</div></a>');
+       } else {
+         $( "#actors" ).append('<div class="btn"><i class="fa fa-globe"></i> ' +
+         entityValue + '</div>');
+       }
      }
      // Check if job title
      else if (entityType === "JobTitle") {
-       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
-         '<div class="btn"><i class="fa fa-briefcase"></i> ' +
-       entityValue + '</div></a>');
+       // Check if URL exists.
+       if (entityURL != "na") {
+          $( "#actors" ).append( '<a href="' + entityURL + '" target="_blank">' +
+          '<div class="btn"><i class="fa fa-briefcase"></i> ' +
+          entityValue + '</div></a>');
+        } else {
+          $( "#actors" ).append('<div class="btn"><i class="fa fa-briefcase"></i> ' +
+          entityValue + '</div>');
+        }
      }
      // Check if job title
      else if (entityType === "Company") {
-       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
-         '<div class="btn"><i class="fa fa-building"></i> ' +
-       entityValue + '</div></a>');
+       // Check if URL exists.
+       if (entityURL != "na") {
+          $( "#actors" ).append( '<a href="' + entityURL + '" target="_blank">' +
+          '<div class="btn"><i class="fa fa-building"></i> ' +
+          entityValue + '</div></a>');
+        } else {
+          $( "#actors" ).append('<div class="btn"><i class="fa fa-building"></i> ' +
+          entityValue + '</div>');
+        }
      }
+     // If no match, append question mark icon.
      else {
-       $( "#actors" ).append( '<a href="' + dbPediaURL + '" target="_blank">' +
-       '<div class="btn"><i class="fa fa-question"></i> ' +
-       entityValue + '</div></a>');
+       // Check if URL exists.
+       if (entityURL != "na") {
+          $( "#actors" ).append( '<a href="' + entityURL + '" target="_blank">' +
+          '<div class="btn"><i class="fa fa-question"></i> ' +
+          entityValue + '</div></a>');
+        } else {
+          $( "#actors" ).append('<div class="btn"><i class="fa fa-question"></i> ' +
+          entityValue + '</div>');
+        }
      }
-
-    console.log("object", entityValue);
-    // for (var prop in obj) {
-    //     // skip loop if the property is from prototype
-    //     if(!obj.hasOwnProperty(prop)) continue;
-    //     if () {
-    //
-    //     }
-    //
-    //     // your code
-    //     console.log(prop + " = " + obj[prop]);
-    // }
-}
+   }
 }
 /*
 * Actors
