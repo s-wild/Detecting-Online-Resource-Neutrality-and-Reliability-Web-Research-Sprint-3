@@ -25,16 +25,16 @@
       <h1 class="text-center logo-text">Content Analyzer</h1>
     </div>
     <!-- <button id="checkPage">Check this page now!</button> -->
-    <div class="statistics text-center">
+    <div class="statistics">
       <div id="spinner">
       </div>
       <div id="results">
-        <div class="result">
+        <div class="result text-center">
           <span class="stat-title font-large">Sentiment</span>
           <canvas id="sentiment"></canvas>
           <span id="sentimentText">NA</span>
         </div>
-        <div class="result">
+        <div class="result text-center">
           <span class="stat-title font-large">Language</span>
           <select id="example">
             <option value="1">1</option>
@@ -45,7 +45,7 @@
           </select>
           <span id="langRating">NA</p>
         </div>
-        <div class="result">
+        <div class="result text-center">
           <span class="stat-title font-large">Emotion</span>
           <span id="emotion">NA</span>
           <span id="emotionText">NA</span>
@@ -54,7 +54,17 @@
           <h2 class="actors">Entities</h2>
           <span id="actors"></span>
         </div>
-        <p id="response">Response Time: <span id="responseTime"></span> ms</p>
+        <div class="result block">
+          <img id="weasel" src="images/weasel-words-icon.png" alt="Weasel">
+          <p id="weaselValue">NA</p>
+        </div>
+        <div class="result block">
+          <div class="stat-wrapper">
+            <img id="reliability" src="images/reliability-icon.png" alt="Accuracy">
+            <p id="reliabilityText">Article Reliability: <span id="reliabilityValue"></span></p>
+          </div>
+        </div>
+        <p id="response" class="text-center">Response Time: <span id="responseTime"></span> ms</p>
       </div>
     </div>
   </body>

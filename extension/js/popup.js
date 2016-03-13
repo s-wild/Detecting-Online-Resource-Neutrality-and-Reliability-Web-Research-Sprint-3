@@ -54,11 +54,18 @@ function postTabURL() {
                   var emotionType = responseValues.alchemy.emotion.highest;
                   var emotionValue = responseValues.alchemy.emotion.value;
                   var entitiesObejct = responseValues.alchemy.entities;
+                  var weaselValues = responseValues.warnings[0];
+                  var reliabilityValue = responseValues.reliability;
+
+
+
                   console.log("responseValues", responseValues);
                   gaugeGenerator(sentimentValue, "sentiment");
                   spellingRatingGenerator(spellingValue);
                   generateEmoji(emotionType, emotionValue);
                   generateEntities(entitiesObejct);
+                  generateWeaselWords(weaselValues);
+                  generateArticleReliability(reliabilityValue);
                   showResults();
                   // Response time.
                   var request_time = new Date().getTime() - start_time;
@@ -202,6 +209,20 @@ function generateEmoji(emotionType, emotionValue) {
     default:
         console.log("no match...");
   }
+}
+/*
+* Weasel Words.
+*/
+function generateWeaselWords(weaselValues) {
+  console.log("weaselValues", weaselValues);
+  document.getElementById("weaselValue").innerHTML = weaselValues;
+}
+/*
+* Accuracy.
+*/
+function generateArticleReliability(reliabilityValue) {
+  console.log("reliabilityValue", reliabilityValue);
+  document.getElementById("reliabilityValue").innerHTML = reliabilityValue + "%";
 }
 /*
 * Actiivity loader.
