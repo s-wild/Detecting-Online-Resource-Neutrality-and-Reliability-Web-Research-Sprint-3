@@ -57,9 +57,6 @@ function postTabURL() {
                   var weaselValues = responseValues.warnings[0];
                   var reliabilityValue = responseValues.reliability;
 
-
-
-                  console.log("responseValues", responseValues);
                   gaugeGenerator(sentimentValue, "sentiment");
                   spellingRatingGenerator(spellingValue);
                   generateEmoji(emotionType, emotionValue);
@@ -91,31 +88,34 @@ function postTabURL() {
 * Gauge
 */
 function gaugeGenerator(value, type){
-  // Check values for text.
-  switch(true) {
-      case value > 70:
-          console.log("Positive");
-          document.getElementById("sentimentText").innerHTML = "Positive";
-          break;
-      case value <= 70 && value > 50 :
-          console.log("Neutral/Positive");
-          document.getElementById("sentimentText").innerHTML = "Neutral/Positive";
-          break;
-      case value == 50:
-          console.log("Neutral");
-          document.getElementById("sentimentText").innerHTML = "Neutral";
-          break;
-      case value < 50 && value >= 30 :
-          console.log("Neutral/Negative");
-          document.getElementById("sentimentText").innerHTML = "Neutral/Negative";
-          break;
-      case value < 30:
-          console.log("Negative");
-          document.getElementById("sentimentText").innerHTML = "Negative";
-          break;
-      default:
-          console.log("Can't calculate value.");
+  // Check values and set text for sentiment.
+  if (type == "sentiment") {
+    switch(true) {
+        case value > 70:
+            console.log("Positive");
+            document.getElementById("sentimentText").innerHTML = "Positive";
+            break;
+        case value <= 70 && value > 50 :
+            console.log("Neutral/Positive");
+            document.getElementById("sentimentText").innerHTML = "Neutral/Positive";
+            break;
+        case value == 50:
+            console.log("Neutral");
+            document.getElementById("sentimentText").innerHTML = "Neutral";
+            break;
+        case value < 50 && value >= 30 :
+            console.log("Neutral/Negative");
+            document.getElementById("sentimentText").innerHTML = "Neutral/Negative";
+            break;
+        case value < 30:
+            console.log("Negative");
+            document.getElementById("sentimentText").innerHTML = "Negative";
+            break;
+        default:
+            console.log("Can't calculate value.");
+    }
   }
+  // Set options for gauge.
   var opts = {
     lines: 12, // The number of lines to draw
     angle: 0.15, // The length of each line
@@ -137,9 +137,10 @@ function gaugeGenerator(value, type){
           var target = document.getElementById('sentiment');
           console.log("sentiment");
           break;
-      case type == "writing":
-          var target = document.getElementById('writing');
-          console.log("writing");
+      case type == "reliability":
+          var target = document.getElementById('reliabilityGauge');
+          console.log("reliability");
+          reliabilityValue = value;
           break;
       default:
           target = "na";
@@ -215,7 +216,12 @@ function generateEmoji(emotionType, emotionValue) {
 */
 function generateWeaselWords(weaselValues) {
   console.log("weaselValues", weaselValues);
+  // Check if undefined.
+  if (weaselValues === undefined) {
+    weaselValues = "Nothing bad to say... the article looks fine.";
+  }
   document.getElementById("weaselValue").innerHTML = weaselValues;
+  // Add gauge.
 }
 /*
 * Accuracy.
@@ -223,6 +229,7 @@ function generateWeaselWords(weaselValues) {
 function generateArticleReliability(reliabilityValue) {
   console.log("reliabilityValue", reliabilityValue);
   document.getElementById("reliabilityValue").innerHTML = reliabilityValue + "%";
+  gaugeGenerator(reliabilityValue, "reliability");
 }
 /*
 * Actiivity loader.
