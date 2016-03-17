@@ -4,9 +4,11 @@
 * A URL is retrived from current chrome tab and the results from the
 * server will be displayed.
 */
+//
+"use strict";
 window.onload = function(){
   // Performance timer
-  start_time = new Date().getTime();
+  var start_time = new Date().getTime();
 
   /*
   * Hide results on load, wait for a response from the server and show
@@ -24,9 +26,10 @@ window.onload = function(){
 
         // Combine server URL (settings.js) with chrome tab URL.
         var url = server_url + 'api';
+        console.log(url);
 
         // If no response, assign no value.
-        responseValues = "na";
+        var responseValues = "na";
 
         // Check if user is on a new tab, prevent application if so.
         if (currentProtocolURL == "chrome://newtab/") {
@@ -42,32 +45,32 @@ window.onload = function(){
                   // Parse JSON from URL... May need updating when we return JSON instead of text.
                   const responseValues = JSON.parse(xmlhttp.responseText);
                   console.log("responseValues",responseValues);
-                  var sentimentValue = responseValues.alchemy.sentiment;
-                  var spellingValue = responseValues.spelling;
-                  var emotionType = responseValues.alchemy.emotion.highest;
-                  var emotionValue = responseValues.alchemy.emotion.value;
-                  var entitiesObejct = responseValues.alchemy.entities;
-                  var weaselValues = responseValues.warnings[0];
+                  let sentimentValue = responseValues.alchemy.sentiment;
+                  let spellingValue = responseValues.spelling;
+                  let emotionType = responseValues.alchemy.emotion.highest;
+                  let emotionValue = responseValues.alchemy.emotion.value;
+                  let entitiesObejct = responseValues.alchemy.entities;
+                  let weaselValues = responseValues.warnings[0];
                   var reliabilityValue = responseValues.reliability;
 
                   // Show results in extension display.
                   chromeExtensionDisplay.showResults();
 
                   // Generate display functions.
-                  //generate.gauge(sentimentValue, "sentiment");
-                  //generate.spellingRating(spellingValue);
-                  //generate.emoji(emotionType, emotionValue);
-                  //generate.weaselWords(weaselValues);
-                  //generate.reliability(reliabilityValue);
-                  //generate.entitiesList(entitiesObejct);
+                  generate.gauge(sentimentValue, "sentiment");
+                  generate.spellingRating(spellingValue);
+                  generate.emoji(emotionType, emotionValue);
+                  generate.weaselWords(weaselValues);
+                  generate.reliability(reliabilityValue);
+                  generate.entitiesList(entitiesObejct);
 
                   // Response time.
                   var request_time = new Date().getTime() - start_time;
                   //document.getElementById("responseTime").innerHTML = request_time;
               }
-              else {
-                messages.connectionError();
-              }
+          };
+          xmlhttp.onerror= function(e) {
+              messages.connectionError();
           };
           xmlhttp.open("POST", url, true);
           xmlhttp.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
@@ -81,7 +84,7 @@ window.onload = function(){
 /*
 * Chrome Extension Display
 */
-chromeExtensionDisplay = {
+var chromeExtensionDisplay = {
     hideResults: function() {
         document.getElementById("results").style.display = 'none';
     },
@@ -93,12 +96,15 @@ chromeExtensionDisplay = {
 /*
 * Error Messages
 */
-messages = {
+var messages = {
     connectionError: function() {
-        document.getElementById("results").innerHTML = "<p>Problems connecting with server...</p>";
+      document.getElementById("results").innerHTML = "<p>Problems connecting with server...</p>";
     },
     noURLError: function() {
       document.getElementById("results").innerHTML = "<p>Please visit a web page...</p>";
+    },
+    genericError: function() {
+      document.getElementById("results").innerHTML = "<p>Error</p>";
     }
 };
 /*
@@ -133,7 +139,7 @@ function activityIndicator() {
 /*
 * This group of functions generates selected results in the extension display.
 */
-generate = {
+var generate = {
     gauge: function(value, type) {
       // Check values and set text for sentiment.
       if (type == "sentiment") {
@@ -184,12 +190,10 @@ generate = {
       switch(type) {
           case "sentiment":
               var target = document.getElementById('sentiment');
-              console.log("sentiment");
               break;
           case "reliability":
               var target = document.getElementById('reliabilityGauge');
-              console.log("reliability");
-              reliabilityValue = value;
+              var reliabilityValue = value;
               break;
           default:
               target = "na";
@@ -210,20 +214,26 @@ generate = {
         theme: 'fontawesome-stars'
       });
       $('#example').barrating('set', starValueRounded);
-      if(starValueRounded == 5) {
-          document.getElementById("langRating").innerHTML = 'Exceptional';
-      }
-      if(starValueRounded == 4) {
-          document.getElementById("langRating").innerHTML = 'Good';
-      }
-      if(starValueRounded == 3) {
-          document.getElementById("langRating").innerHTML = 'Average';
-      }
-      if(starValueRounded == 2) {
-          document.getElementById("langRating").innerHTML = 'Poor';
-      }
-      if(starValueRounded == 1) {
-          document.getElementById("langRating").innerHTML = 'Terrible';
+      let langRatingHTML = document.getElementById("langRating");
+      console.log(typeof(starValueRounded));
+      switch (parseInt(starValueRounded)) {
+        case 5:
+          langRatingHTML.innerHTML = 'Excellent';
+          break;
+        case 4:
+          langRatingHTML.innerHTML = 'Good';
+          break;
+        case 3:
+          langRatingHTML.innerHTML = 'Average';
+          break;
+        case 2:
+          langRatingHTML.innerHTML = 'Poor';
+          break;
+        case 1:
+          langRatingHTML.innerHTML = 'Terrible';
+          break;
+        default:
+          langRatingHTML.innerHTML = 'na';
       }
     },
     emoji: function(emotionType, emotionValue) {
