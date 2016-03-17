@@ -88,11 +88,112 @@ var chromeExtensionDisplay = {
     hideResults: function() {
         document.getElementById("results").style.display = 'none';
     },
+<<<<<<< HEAD
     showResults: function() {
       document.getElementById("results").style.display = 'block';
       document.getElementById("spinner").style.display = 'none';
     }
 };
+=======
+    limitMax: 'false',   // If true, the pointer will not go past the end of the gauge
+    //colorStart: 'red',   // Colors
+    colorStop: 'green',    // just experiment with them
+    strokeColor: 'red',   // to see which ones work best for you
+    generateGradient: false,
+  };
+  // Check type for gauge
+  switch(true) {
+      case type == "sentiment":
+          var target = document.getElementById('sentiment');
+          console.log("sentiment");
+          break;
+      case type == "reliability":
+          var target = document.getElementById('reliabilityGauge');
+          console.log("reliability");
+          reliabilityValue = value;
+          break;
+      default:
+          target = "na";
+  }
+
+  // Set values to canvas.
+  if (target != "na") {
+    var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+    gauge.maxValue = 100; // set max gauge value
+    gauge.animationSpeed = 5; // set animation speed (32 is default value)
+    gauge.set(value); // set actual value
+  }
+}
+/*
+* Spelling Generator.
+*/
+function spellingRatingGenerator(spellingValue) {
+  console.log("spellingValue", spellingValue);
+  var starValue = (parseInt(spellingValue))/20;
+  var starValueRounded = starValue.toFixed(0);
+  console.log("starValue", starValueRounded);
+  $('#example').barrating({
+    theme: 'fontawesome-stars'
+  });
+  $('#example').barrating('set', starValueRounded);
+  if(starValueRounded == 5) {
+      document.getElementById("langRating").innerHTML = 'Exceptional';
+  }
+  if(starValueRounded == 4) {
+      document.getElementById("langRating").innerHTML = 'Good';
+  }
+  if(starValueRounded == 3) {
+      document.getElementById("langRating").innerHTML = 'Average';
+  }
+  if(starValueRounded == 2) {
+      document.getElementById("langRating").innerHTML = 'Poor';
+  }
+  if(starValueRounded == 1) {
+      document.getElementById("langRating").innerHTML = 'Terrible';
+  }
+}
+/*
+* Generate Emoji.
+*/
+function generateEmoji(emotionType, emotionValue) {
+  switch(true) {
+    case emotionType == "joy":
+      document.getElementById("emotion").innerHTML = '<img src="images/joy.png" alt="Emoji Icon">';
+      document.getElementById("emotionText").innerHTML = 'Joy';
+    break;
+    case emotionType == "disgust":
+      document.getElementById("emotionText").innerHTML = 'Disgust';
+      document.getElementById("emotion").innerHTML = '<img src="images/disgust.png" alt="Emoji Icon">';
+    break;
+    case emotionType == "anger":
+      document.getElementById("emotionText").innerHTML = 'Anger';
+      document.getElementById("emotion").innerHTML = '<img src="images/angry.png" alt="Emoji Icon">';
+    break;
+    case emotionType == "fear":
+      document.getElementById("emotionText").innerHTML = 'Fear';
+      document.getElementById("emotion").innerHTML = '<img src="images/fear.png" alt="Emoji Icon">';
+    break;
+    case emotionType == "sadness":
+      document.getElementById("emotionText").innerHTML = 'Sadness';
+      document.getElementById("emotion").innerHTML = '<img src="images/sad.png" alt="Emoji Icon">';
+    break;
+    default:
+        console.log("no match...");
+  }
+}
+/*
+* Weasel Words.
+*/
+function generateWeaselWords(weaselValues) {
+  console.log("weaselValues", weaselValues);
+  // Check if undefined.
+  if (weaselValues === undefined) {
+    weaselValues = "Nothing bad to say... the article looks fine.";
+  }
+  document.getElementById("weaselValue").innerHTML = weaselValues;
+  // Add gauge.
+}
+>>>>>>> fc7d43c4af479309871418307e6881cb5e775430
 /*
 * Error Messages
 */
@@ -199,6 +300,7 @@ var generate = {
               target = "na";
       }
 
+<<<<<<< HEAD
       // Set values to canvas.
       if (target != "na") {
         var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
@@ -278,6 +380,18 @@ var generate = {
       for (var key in entitiesObejct) {
         // skip loop if the property is from prototype
         if (!entitiesObejct.hasOwnProperty(key)) continue;
+=======
+    var obj = entitiesObejct[key];
+    var entityType = obj.type;
+    var entityValue = obj.text;
+    var entityURL = "na";
+    if (obj.disambiguated) {
+      var entityDisambiguated = obj.disambiguated;
+      if (entityDisambiguated.website) {
+        entityURL = entityDisambiguated.website;
+      }
+    }
+>>>>>>> fc7d43c4af479309871418307e6881cb5e775430
 
         var obj = entitiesObejct[key];
         var entityType = obj.type;
