@@ -9,17 +9,16 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Performance timer
   start_time = new Date().getTime();
-  hideResults();
+
+  /*
+  * Hide results on load, wait for a response from the server and show
+  * activityIndicator.
+  */
+  chromeExtensionDisplay.hideResults();
   activityIndicator();
 
-  // Get URL contents.
+  // Post URL To server.
   postTabURL();
-
-  // var checkPageButton = document.getElementById('checkPage');
-  // checkPageButton.addEventListener('click', function() {
-  //   console.log("URL is: " + currentUrl);
-  //
-  // }, false);
 }, false);
 
 function postTabURL() {
@@ -29,16 +28,17 @@ function postTabURL() {
 
         // Get URL in current tab.
         var currentProtocolURL = tabs[0].url;
-        // remove protocol from String using regex from http://stackoverflow.com/questions/8206269/how-to-remove-http-from-a-url-in-javascript
-        var currentURL = currentProtocolURL.replace(/.*?:\/\//g, "");
 
         // Combine server URL (settings.js) with chrome tab URL.
         var url = server_url + 'api';
+
+        // If no response, assign no value.
         responseValues = "na";
-        console.log(currentProtocolURL, "currentProtocolURL");
+
+        // Check if user is on a new tab, prevent application if so.
         if (currentProtocolURL == "chrome://newtab/") {
           console.log("visit page...");
-          errorMessageNoUrl();
+          messages.errorMessageNoUrl();
         }
         else {
           var data = {"url": currentProtocolURL};
@@ -64,7 +64,7 @@ function postTabURL() {
                   generateEntities(entitiesObejct);
                   generateWeaselWords(weaselValues);
                   generateArticleReliability(reliabilityValue);
-                  showResults();
+                  chromeExtensionDisplay.showResults();
                   // Response time.
                   var request_time = new Date().getTime() - start_time;
                   console.log("req time",request_time);
@@ -76,7 +76,8 @@ function postTabURL() {
           };
           xmlhttp.open("POST", url, true);
           xmlhttp.onerror= function(e) {
-              errorMessage();
+              // Show Error Messages.
+              messages.connectionError();
           };
           xmlhttp.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
           xmlhttp.send(JSON.stringify(data));
@@ -356,20 +357,25 @@ function generateEntities(entitiesObejct) {
    }
 }
 /*
-* Actors
+* Display
 */
-function hideResults() {
-  document.getElementById("results").style.display = 'none';
-}
-function showResults() {
-  document.getElementById("results").style.display = 'block';
-  document.getElementById("spinner").style.display = 'none';
-}
-function errorMessage(){
-  showResults();
-  document.getElementById("results").innerHTML = "<p>Problems connecting with server...</p>";
-}
-function errorMessageNoUrl(){
-  showResults();
-  document.getElementById("results").innerHTML = "<p>Please visit a web page...</p>";
-}
+chromeExtensionDisplay = {
+    hideResults: function() {
+        document.getElementById("results").style.display = 'none';
+    },
+    showResults: function() {
+      document.getElementById("results").style.display = 'block';
+      document.getElementById("spinner").style.display = 'none';
+    }
+};
+/*
+* Error Messages
+*/
+messages = {
+    connectionError: function() {
+        document.getElementById("results").innerHTML = "<p>Problems connecting with server...</p>";
+    },
+    noURLError: function() {
+      document.getElementById("results").innerHTML = "<p>Please visit a web page...</p>";
+    }
+};
