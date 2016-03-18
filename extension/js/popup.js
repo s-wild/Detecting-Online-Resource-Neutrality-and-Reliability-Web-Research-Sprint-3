@@ -256,7 +256,7 @@ var generate = {
         break;
         case "sadness":
           document.getElementById("emotionText").innerHTML = 'Sadness';
-          document.getElementById("emotion").innerHTML = '<img src="images/sadness.png" alt="Emoji Icon">';
+          document.getElementById("emotion").innerHTML = '<img src="images/sad.png" alt="Emoji Icon">';
         break;
         default:
             console.log("no match...");
