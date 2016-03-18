@@ -66,7 +66,7 @@ window.onload = function(){
 
                   // Response time.
                   var request_time = new Date().getTime() - start_time;
-                  //document.getElementById("responseTime").innerHTML = request_time;
+                  document.getElementById("responseTime").innerHTML = request_time;
               }
           };
           xmlhttp.onerror= function(e) {
