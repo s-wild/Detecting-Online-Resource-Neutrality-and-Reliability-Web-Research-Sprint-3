@@ -270,7 +270,7 @@ var generate = {
       document.getElementById("weaselValue").innerHTML = weaselValues;
     },
     reliability: function(reliabilityValue) {
-      document.getElementById("reliabilityValue").innerHTML = reliabilityValue + "%";
+      document.getElementById("reliabilityValue").innerHTML = Math.round(reliabilityValue) + "%";
       generate.gauge(reliabilityValue, "reliability");
     },
     entitiesList: function(entitiesObejct) {
