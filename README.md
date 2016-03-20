@@ -19,7 +19,7 @@ Copy the `.env-sample` file to a file named `.env` in the same directory, and ad
 
 Start up Neo4j with `neo4j start`
 
-`npm start` will launch up the server, listening on port 3000 by default.
+`npm start` will launch the server, listening on port 3000 by default.
 
 #### Linting
 Uses Google's eslint configuration. Run `npm lint` to check.
