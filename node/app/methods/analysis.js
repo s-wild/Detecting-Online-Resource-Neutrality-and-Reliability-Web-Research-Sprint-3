@@ -1,5 +1,11 @@
+/**
+ * Perform multiple analysis stages on submitted URLs.
+ * Returns a JSON object with results.
+ */
+
 'use strict';
 
+// NPM Modules
 const request = require('request');
 const striptags = require('striptags');
 const sentiment = require('sentiment');
@@ -7,8 +13,9 @@ const rousseau = require('rousseau');
 const spellcheck = require('spellchecker');
 const AlchemyAPI = require('alchemy-api');
 const async = require('async');
-
 const alchemy = new AlchemyAPI(process.env.ALCHEMY_API_KEY);
+
+// Local Modules
 const errorCodes = require('../lib/ErrorCodes');
 const ReliabilityEngine = require('./reliability');
 const reliability = new ReliabilityEngine();

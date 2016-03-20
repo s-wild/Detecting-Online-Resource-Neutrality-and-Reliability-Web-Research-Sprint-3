@@ -2,8 +2,8 @@
 
 /**
  * Set up routes around the application.
- * @param  {[type]} app     [description]
- * @param  {[type]} methods [description]
+ * @param  {Object} app     Express app.
+ * @param  {Object} methods Request handlers.
  */
 function setup(app, methods) {
   // API
